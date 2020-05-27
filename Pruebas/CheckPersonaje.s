@@ -10,7 +10,8 @@ main:
 
 loop:
 	ldr r0, =Ganado		@array
-	ldrb r0, [r0], r6	@Siguiente bit de array
+	add r0, r0, r6
+	ldrb r0, [r0]	@Siguiente bit de array
 	ldr r1, =Siguiente	@Otro coso ganado
 	ldrb r1, [r1]		@Byte del nuevo personaje
 	cmp r0, r1		@Comparan
