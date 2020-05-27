@@ -20,7 +20,8 @@ nombre_jugador1:
 	ldr r0,=nom_jugador1		/*Se obtiene la direccion de nom_jugador*/
 	ldr r0, [r0]			/*Se obtiene el valor de nom_jugador*/
 	
-	pop {r4-r12, pc}		/*Regresando sin error*/
+	pop {r4-r12}		/*Regresando sin error*/
+	mov pc, lr
 
 
 

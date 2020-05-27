@@ -79,8 +79,7 @@ main:
 	
 	/*Se sale correctamente*/
 	mov r0,#0
-	mov r1,#0
-	mov r3, #0
+	mov r3,#0
 	ldmfd sp!,{lr}
 	bx lr
 
