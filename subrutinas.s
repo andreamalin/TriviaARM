@@ -1,36 +1,56 @@
 /*Subrutinas que llevan a cabo las operaciones de la trivia ARM*/
 
-.data
-.align 2
-
-
-
-ingreso_nom:.asciz "\nHola jugador! Ingresa tu nombre:"
-nom_jugador: .asciz ""
-formato:.asciz  "\n%s"
-
 .text
 .align 2
-.global ingresando_nombres
 
-/*	Parametros	> r1 el nombre del jugador
+
+/*	Parametros	> r1 el nombre del jugador 1
 	Retorna		> r0 con el nombre del jugador	 */
-
-ingresando_nombres:
+.global nombre_jugador1
+nombre_jugador1:
 	push {r4-r12, lr}
 
 	ldr r0,=ingreso_nom     /* cargar dirección de la cadena a imprimir*/ 
 	bl puts					/* se muestra */	
 
 	ldr r0,=formato			/*Formato de impresion*/	
-	ldr r1,=nom_jugador		/*Se guarda lo ingresado dentro de nom_jugador*/
+	ldr r1,=nom_jugador1		/*Se guarda lo ingresado dentro de nom_jugador*/
 	bl scanf				/*Se lee lo ingresado por el usuario*/
 	
-	ldr r0,=nom_jugador		/*Se obtiene la direccion de nom_jugador*/
+	ldr r0,=nom_jugador1		/*Se obtiene la direccion de nom_jugador*/
 	ldr r0, [r0]			/*Se obtiene el valor de nom_jugador*/
 	
 	pop {r4-r12, pc}		/*Regresando sin error*/
 
+
+
+
+/*	Parametros	> r1 el nombre del jugador
+	Retorna		> r0 con el nombre del jugador 2 */
+.global nombre_jugador2
+nombre_jugador2:
+	push {r4-r12, lr}
+
+	ldr r0,=ingreso_nom2     /* cargar dirección de la cadena a imprimir*/ 
+	bl puts					/* se muestra */	
+
+	ldr r0,=formato			/*Formato de impresion*/	
+	ldr r1,=nom_jugador2		/*Se guarda lo ingresado dentro de nom_jugador*/
+	bl scanf				/*Se lee lo ingresado por el usuario*/
+	
+	ldr r0,=nom_jugador2		/*Se obtiene la direccion de nom_jugador*/
+	ldr r0, [r0]			/*Se obtiene el valor de nom_jugador*/
+	
+	pop {r4-r12, pc}		/*Regresando sin error*/
+
+
+.data
+.align 2
+nom_jugador1:	.asciz "            "
+nom_jugador2:	.asciz "            "
+ingreso_nom:	.asciz "\nHola jugador 1! Ingresa tu nombre:"
+ingreso_nom2:	.asciz "\nHola jugador 2! Ingresa tu nombre:"
+formato:		.asciz  "\n%s"
 
 
 
