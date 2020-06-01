@@ -8,7 +8,8 @@
 .align 2
 
 opcion_ingresada:	.word 0
-formato:.asciz  "\n %d"
+turno:			.word 0
+formato:		.asciz  "\n %d"
 nom_jugador1:	.asciz " "
 nom_jugador2:	.asciz " "
 
@@ -25,6 +26,7 @@ nom_jugador2:	.asciz " "
 main:
 	ldr r4, =nom_jugador1	/*R4 -> Nombre del jugador 1*/
 	ldr r5, =nom_jugador2	/*R5 -> Nombre del jugador 2*/
+	ldr r6, =turno			/*R6 -> Turno actual */
 	mov r11, #0				/*R11 -> Contador*/
 	
 
@@ -54,10 +56,14 @@ main:
 		b impresion_error					/*No es opcion definida*/
 	
 	jugar:
-		b nombre_jugador1				/*Se manda a la subrutina*/
-		mov r4, r0						/*Se guarda en r4*/
-		b nombre_jugador2				/*Se manda a la subrutina*/
-		mov r5, r0						/*Se guarda en r5*/
+		bl nombre_jugador1				/*Se manda a la subrutina*/
+		mov r4, r1		
+
+		bl nombre_jugador2				/*Se manda a la subrutina*/
+		mov r5, r1						/*Se guarda en r5*/
+
+		/*Vamos cambiando turno*/
+		bl jugarTurnos
 
 	/*Imprime el menu*/
 	impresion_menu:
@@ -89,3 +95,4 @@ menu:
 
 salir:
 	.asciz "\nTe esperamos pronto para otra partida!\n"
+

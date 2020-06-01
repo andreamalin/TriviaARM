@@ -14,14 +14,12 @@ nombre_jugador1:
 	bl puts					/* se muestra */	
 
 	ldr r0,=formato			/*Formato de impresion*/	
-	ldr r1,=nom_jugador1		/*Se guarda lo ingresado dentro de nom_jugador*/
+	ldr r1,=nom_jugador		/*Se guarda lo ingresado dentro de nom_jugador*/
 	bl scanf				/*Se lee lo ingresado por el usuario*/
 	
-	ldr r0,=nom_jugador1		/*Se obtiene la direccion de nom_jugador*/
-	ldr r0, [r0]			/*Se obtiene el valor de nom_jugador*/
+	ldr r1,=nom_jugador		/*Se obtiene la direccion de nom_jugador*/
 	
-	pop {r4-r12}		/*Regresando sin error*/
-	mov pc, lr
+	pop {r4-r12, pc}		/*Regresando sin error*/
 
 
 
@@ -36,24 +34,91 @@ nombre_jugador2:
 	bl puts					/* se muestra */	
 
 	ldr r0,=formato			/*Formato de impresion*/	
-	ldr r1,=nom_jugador2		/*Se guarda lo ingresado dentro de nom_jugador*/
+	ldr r1,=nom_jugador		/*Se guarda lo ingresado dentro de nom_jugador*/
 	bl scanf				/*Se lee lo ingresado por el usuario*/
 	
-	ldr r0,=nom_jugador2		/*Se obtiene la direccion de nom_jugador*/
-	ldr r0, [r0]			/*Se obtiene el valor de nom_jugador*/
+	ldr r1,=nom_jugador		/*Se obtiene la direccion de nom_jugador*/
 	
 	pop {r4-r12, pc}		/*Regresando sin error*/
+
+/*	Parametros	> r6 turno actual, r5 nombre jugador 2, r4 nombre jugador 1
+	Retorna		>  */
+.global jugarTurnos
+jugarTurnos:
+	push {r4-r12, lr}
+
+	mov r1, r4
+	ldr r0, = jugador_actual    /* cargar dirección de la cadena a imprimir*/ 
+	bl printf                   /* se muestra */
+
+	cmp r6, #0						/*Se compara el turno actual con 0 (j1)*/
+	beq turnoJ1
+
+turnoJ1:
+	mov r0,sp					/*Se apunta al stack*/
+	bl mysrand					/*Se jala la semilla a r0*/
+
+	bl myrand					/*R0 contendra el numero aleatorio generado*/
+	push {r0}					/*R0 se mete al stack*/
+
+	mov r1,r0					/*Se guarda r0 en r1*/
+	and r1,r1,#6				/*R1 llevara el limite superior de numero a generar -> Cantidad de categorias*/
+
+	
+	pop {r0}					/*Se saca r0 del stack*/
+	mov r8, r1					/*Se jala a r8 el numero aleatorio*/
+
+	mov r9, #4
+	mul r9, r8 					/*Se multiplica por 4 para tener la cantidad de bits*/
+
+	ldr r1, =categorias			/*Se apunta al arreglo*/
+	add r1, r1, r9
+	ldr r1, [r1]			/*Se carga*/
+	ldr r0,=categoria_actual	/*Formato de impresion*/
+	bl printf					/*Se imprime*/
+
+
+
+	pop {r4-r12, pc}			/*Regresando sin error*/
+
+
+
+
+/* Subrutina para generar categoria/pregunta aleatoria tomada de: 
+Villena, A. & Asenjo, R. & Corbera, F. Practicas basadas en Raspberry Pi */
+myrand:					/*Genera el aleatorio*/
+	ldr r1, =seed		/*Se jala el valor de la semilla*/
+	ldr r0, [r1]		/*Se lee el valor de la semilla*/
+	ldr r2, [r1,#4]		/*Se lee la const1*/
+	mul r3, r0, r2		/*R3 contendra seed*1103515245*/
+	ldr r0, [r1,#8]		/*Se lee la const2*/
+	add r0, r0, r3		/*R0 contendra R3+12345*/
+	str r0, [r1]		/*Se guarda R0 en R1 (semilla)*/
+	lsl r0, #1			/*Logical Shift Left*/
+	lsr r0, #17			/*Logical Shift Right*/
+	mov pc, lr			/*Retorno*/
+
+mysrand:				/*Retorna el aleatorio*/
+	ldr r1, =seed		/*Se jala la semilla*/
+	str r0, [r1]		/*Se guarda R0 en R1*/
+	mov pc, lr			/*Se retorna*/
+	
 
 
 .data
 .align 2
-nom_jugador1:	.asciz "            "
-nom_jugador2:	.asciz "            "
+nom_jugador:	.asciz "            "
 ingreso_nom:	.asciz "\nHola jugador 1! Ingresa tu nombre:"
 ingreso_nom2:	.asciz "\nHola jugador 2! Ingresa tu nombre:"
+jugador_actual:	.asciz  "\nEs turno de: %s"
+categoria_actual:	.asciz  "\nCategoria actual: %s\n"
 formato:		.asciz  "\n%s"
-
-
+seed: 	.word 	1
+/*Const1 y const2 seran valores constantes para generar aleatorios*/
+const1:	.word	1103515245
+const2:	.word	12345
+num: .asciz "%d\n"
+categorias:		.asciz "Entretenimiento  y Deportes", "Literatura", "Ciencia y Tecnologia", "Geografia", "Arte", "Historia"
 
 
 
