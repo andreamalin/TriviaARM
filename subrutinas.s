@@ -1,8 +1,32 @@
 /*Subrutinas que llevan a cabo las operaciones de la trivia ARM*/
 
-.text
-.align 2
+.data
+seed: 	.word 	1
+const1:	.word	1103515245
+const2:	.word	12345
 
+.text
+.global myrand, mysrand
+
+myrand:					/*Genera el aleatorio*/
+	ldr r1, =seed		/*Se jala el valor de la semilla*/
+	ldr r0, [r1]		/*Se lee el valor de la semilla*/
+	ldr r2, [r1,#4]		/*Se lee la const1*/
+	mul r3, r0, r2		/*R3 contendra seed*1103515245*/
+	ldr r0, [r1,#8]		/*Se lee la const2*/
+	add r0, r0, r3		/*R0 contendra R3+12345*/
+	str r0, [r1]		/*Se guarda R0 en R1 (semilla)*/
+	lsl r0, #1			/*Logical Shift Left*/
+	lsr r0, #17			/*Logical Shift Right*/
+	mov pc, lr			/*Retorno*/
+
+mysrand:				/*Retorna el aleatorio*/
+	ldr r1, =seed		/*Se jala la semilla*/
+	str r0, [r1]		/*Se guarda R0 en R1*/
+	mov pc, lr			/*Se retorna*/
+
+
+.text
 
 /*	Parametros	> r1 el nombre del jugador 1
 	Retorna		> r0 con el nombre del jugador	 */
@@ -47,99 +71,124 @@ nombre_jugador2:
 jugarTurnos:
 	push {r4-r12, lr}
 
-	mov r1, r4
+aleatorios:
+	bl myrand					/*R0 contendra el numero aleatorio generado*/
+	push {r0}					/*R0 se mete al stack*/
+
+	mov r1,r0					/*Se guarda r0 en r1*/
+	and r1,r1,#5				/*R1 llevara el limite superior de numero a generar -> Cantidad de categorias*/
+	mov r8, r1					/*Se jala a r8 el numero aleatorio*/
+	pop {r0}					/*Se saca r0 del stack*/
+	
+	cmp r6, #1
+	moveq r1, r4				/*Se jala el nombre del jugador actual*/
+	movne r1, r5				
 	ldr r0, = jugador_actual    /* cargar dirección de la cadena a imprimir*/ 
 	bl printf                   /* se muestra */
 
-	cmp r6, #0						/*Se compara el turno actual con 0 (j1)*/
-	beq turnoJ1
-
-turnoJ1:
-	mov r0,sp					/*Se apunta al stack*/
-	b mysrand					/*Se jala la semilla a r0*/
-
-retorno:
+	bl myrand					/*R0 contendra el numero aleatorio generado*/
 	push {r0}					/*R0 se mete al stack*/
-	
+
 	mov r1,r0					/*Se guarda r0 en r1*/
-	and r1,r1,#6				/*R1 llevara el limite superior de numero a generar*/
-
-	ldr r0,=num					/*Formato de impresion*/
-	bl printf					/*Se imprime*/
-	
+	and r1,r1,#5				/*R1 llevara el limite superior de numero a generar -> Cantidad de preguntas*/
+	mov r9, r1					/*Se jala a r9 el numero aleatorio*/
 	pop {r0}					/*Se saca r0 del stack*/
+
+	mov r10, #4					/*bytes*/
+	mul r10, r9					/*Direccion de la respuesta correcta dentro del vector*/
+
+	/*r8 -> categoria aleatoria      r9 -> pregunta aleatoria      r10 -> direccion de la respuesta correcta */
+	cmp r8, #0
+	b mostrar_categoria1
 	
-	mov r8, r1					/*Se jala a r8 el numero aleatorio*/
+mostrar_categoria1:					/*CATEGORIA -> CIENCIAS*/
+	/*Comparamos que pregunta es*/
+	cmp r9, #0
+	ldreq r0, =ciencia_1
+	bleq puts						/*Se muestra la pregunta correspondiente*/
+	ldreq r0, =aleatorios1_ciencia
+	cmp r9, #1
+	ldreq r0, =ciencia_2
+	bleq puts						/*Se muestra la pregunta correspondiente*/
+	ldreq r0, =aleatorios2_ciencia
+	cmp r9, #2
+	ldreq r0, =ciencia_3
+	bleq puts						/*Se muestra la pregunta correspondiente*/
+	ldreq r0, =aleatorios3_ciencia
+	cmp r9, #3
+	ldreq r0, =ciencia_4
+	bleq puts						/*Se muestra la pregunta correspondiente*/
+	ldreq r0, =aleatorios4_ciencia
+	cmp r9, #45
+	ldreq r0, =ciencia_5
+	bleq puts						/*Se muestra la pregunta correspondiente*/
+	ldreq r0, =aleatorios5_ciencia
+	cmp r9, #5
+	ldreq r0, =ciencia_6
+	bleq puts						/*Se muestra la pregunta correspondiente*/
+	ldreq r0, =aleatorios6_ciencia
+	bl puts							/*Se muestran las respuestas correspondientes*/
 
-	mov r9, #4
-	mul r9, r8 					/*Se multiplica por 4 para tener la cantidad de bits*/
+	/*Pedimos la respuesta*/
+	ldr r0,=formato				/*Formato de impresion*/	
+	ldr r1,=respuesta			/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf					/*Se lee lo ingresado por el usuario*/
 
-	ldr r1, =categorias			/*Se apunta al arreglo*/
-	add r1, r1, r9
-	ldr r0,=categoria_actual	/*Formato de impresion*/
-	bl printf					/*Se imprime*/
-
-
-
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_ciencia		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	ldreq r0, =respuestaCorrecta	/*La respuesta es correcta*/
+	ldrne r0, =respuestaIncorrecta	/*La respuesta es incorrecta*/
+	bl puts
+	
+finalizarTurno:
 	pop {r4-r12, pc}			/*Regresando sin error*/
 
-mysrand:				/*Retorna el aleatorio*/
-	ldr r1, =seed		/*Se jala la semilla*/
-	str r0, [r1]		/*Se guarda R0 en R1*/
-
-myrand:					/*Genera el aleatorio*/
-	ldr r1, =seed		/*Se jala el valor de la semilla*/
-	ldr r0, [r1]		/*Se lee el valor de la semilla*/
-	ldr r2, [r1,#4]		/*Se lee la const1*/
-	mul r3, r0, r2		/*R3 contendra seed*1103515245*/
-	ldr r0, [r1,#8]		/*Se lee la const2*/
-	add r0, r0, r3		/*R0 contendra R3+12345*/
-	str r0, [r1]		/*Se guarda R0 en R1 (semilla)*/
-	lsl r0, #1			/*Logical Shift Left*/
-	lsr r0, #17			/*Logical Shift Right*/
-	b retorno
-
-
-
-
+ganar_personaje1:
+	ldr r0, = ciencia            /* cargamos personaje deportes*/ 
+	bl puts						 /* se muestra */
+	ldr r0, = ciencia2            /* cargamos personaje deportes*/ 
+	bl puts						 /* se muestra */
+	mov pc, lr 
 
 
 .data
+respuesta:	.byte	' '
 
 nom_jugador:	.asciz "            "
 ingreso_nom:	.asciz "\nHola jugador 1! Ingresa tu nombre:"
 ingreso_nom2:	.asciz "\nHola jugador 2! Ingresa tu nombre:"
 jugador_actual:	.asciz  "\nEs turno de: %s"
-categoria_actual:	.asciz  "\nCategoria actual: %s\n"
+categoria_actual:.asciz  "\nCategoria actual: %s\n"
 formato:		.asciz  "\n%s"
 num:			.asciz	"\n%d\n"
-categorias:		.asciz "Entretenimiento  y Deportes", "Literatura", "Ciencia y Tecnologia", "Geografia", "Arte", "Historia"
 
-seed: 	.word 	1
-/*Const1 y const2 seran valores constantes para generar aleatorios*/
-const1:	.word	1103515245
-const2:	.word	12345
+categoria1:		.asciz "Entretenimiento  y Deportes"
+categoria2:		.asciz "Literatura"
+categoria3:		.asciz "Ciencia y Tecnologia"
+categoria4:		.asciz "Geografia"
+categoria5:		.asciz "Arte"
+categoria6:		.asciz "Historia"
 
+respuestaCorrecta:		.asciz "\nLo ingresado es correcto! Sigues jugando"
+respuestaIncorrecta:	.asciz "\nLo ingresado es incorrecto! Pierdes turno"
 
-
-
-
-
-
-/*PREGUNTAS PARA LA TRIVIA*/
-preguntas_ciencia:		.asciz "¿Como se llama el componente minimo que forma a los seres vivos?", "Unidad basica de la materia", "La  columna más a la derecha de la tabla periódica esta compuesta por", " ¿Que elemento tiene el simbolo Cu?", " Ciencia que estudia los seres vivos", "La velocidad a la que viaja la luz es"
-respuestas_ciencia:		.asciz  "Celula", "Atomo", "Gases nobles", "Cobre", "Biologia", "300,000 km/s"
-aleatorios1_ciencia:	.asciz "Tejido, Celula, Particula"
-aleatorios2_ciencia:	.asciz "Atomo, Celula, Mitocondria"
-aleatorios3_ciencia:	.asciz "Haluros, Gases nobles, Minerales"
-aleatorios4_ciencia:	.asciz "Cobre, Carbon, Calcio"
-aleatorios5_ciencia:	.asciz "Biologia, Organismologia, Viviologia"
-aleatorios6_ciencia:	.asciz "300,000 m/s", "300,000 km/s", "30,000 km/h"
-
-preguntas_literatura:	.asciz "¿Quien escribio 'La Iliada'?", "¿Quien es el autor de la 'Divina comedia'?"
-respuestas_literatura:	.asciz "Homero"
-aleatorios1_literatura:	.asciz "Homero, Herodoto, Seneca"
-
+/*PREGUNTAS PARA -> CIENCIAS*/
+ciencia_1:	.asciz "\nComo se llama el componente minimo que forma a los seres vivos?"
+ciencia_2:	.asciz "\nUnidad basica de la materia"
+ciencia_3:	.asciz "\nLa  columna más a la derecha de la tabla periódica esta compuesta por"
+ciencia_4:	.asciz "\nQue elemento tiene el simbolo Cu?"
+ciencia_5:	.asciz "\nCiencia que estudia los seres vivos"
+ciencia_6:	.asciz "\nLa velocidad a la que viaja la luz es"
+aleatorios1_ciencia:	.asciz "a. Tejido\nb. Celula\nc. Particula"
+aleatorios2_ciencia:	.asciz "a. Atomo\nb. Celula\nc. Mitocondria"
+aleatorios3_ciencia:	.asciz "a. Haluros\nb. Gases nobles\nc. Minerales"
+aleatorios4_ciencia:	.asciz "a. Cobre\nb. Carbon\nc. Calcio"
+aleatorios5_ciencia:	.asciz "a. Viviologia\nb. Organismologia\nc. Biologia"
+aleatorios6_ciencia:	.asciz "a. 300,000 m/s\nb. 300,000 km/s\nc. 30,000 km/h"
+respuestas_ciencia:		.byte  'b', 'a', 'b', 'a', 'c', 'b'
 
 /*PERSONAJES DENTRO DE LA TRIVIA*/
 ciencia: .asciz "\n..II7IIIIIIII$NIIIIIIIIIIIIIII~~I.......\n..IIIIIIIIIINNIIIII78MI7IIIIIII=~+......\n..IIIIIIIIIIIIIIIIII7II7IIIIIII=7.......\n....,,,$$$$$$$$$$$$$$7$$$$77+,.....I.II.\n.......777777$$7$7777$777777=.....,I,I,.\n.......7777777NN777NM7777777=....,III~7:\n.......7777777NN777NM7777777=......III..\n.......7777777NN777NN7777777=......I=...\n.......777$$$7MN$77MM777$777=......I....\n.......7777777$$$777$$777777=......I....\n.......777777887$777OD777777=.....?+....\n.......7777777$$$77$77777777=....,I.....\n.......777777777777777777777=...,I,.....\n.......777777777777777777777=..II.......\n.......7777777777777777777777II.........\n.......777777777777777777777=...........\n.......77777777777777777777$=...........\n.......777777777777777777777=...........\n......I777777777777777777777=...........\n.....II777777777777777777777=...........\n....,I.77777777777777777+~77=...........\n....7~.7777777777777777~~~77=...........\n....I..7777777777777777~~~77=...........\n...:I..7777777777777777~~~77=...........\n"
@@ -158,6 +207,7 @@ literatura2: .asciz "\nMMMMMMN$:::,::::::::,:::::::::,,,,:::::::::::::::,:,:::::
 literatura3: .asciz "\nMMMMMMMMMMMMM?????????==========??????????????+=========??????????MMMMMMMMO8MMMM\nMMM7IMMMMMMMM?????????==========DDD????????7DDD=========??????????MMMMMM$M7IMDII\nINNIIM7NMMMMMO????????++=======+DDD????????ZDDD=========?????????OMMMMMMIIOIOIIN\nIIDIIIIMMMMMMM????????++=======+DDD????????ZDDD=========?????????MMMMMMMMIIII7MM\nMIIIIIMMMMMMMM?????????========+DDD????????ZDDD========+?????????MMMMMMMMMDIIMMM\nMM$IDMMMMMMMMMZ????????========+DDD????????ZDDD========+????????IMMMMMMMMMMZIMMM\nMMZIMMMMMMMMMMM????????==++====+DDD????????ZDDD=====++=?????????ZMMMMMMMMMM7IMMM\nMMMI8MMMMMMMMMM????????===7====+DDD????????ZDDD=====I==?????????NMMMMMMMMMMIOMMM\nMMMIIMMMMMMMMMM7???????====Z====8DD????????IDD8+===$===?????????MMMMMMMMMM$IMMMM\nMMMMI$MMMMMMMMMN???????+====ZI+==?????????????===+Z+===?????????MMMMMMMMM77MMMMM\nMMMMM7IOMMMMMMMM???????+=====+7O??????????????+Z$======?????????MMMMMMOIIZMMMMMM\nMMMMMMN7IIZDNDZI????????========+$OOOZZ$$ZOOOZ+=======+?????????IIIIIIIDMMMMMMMM\n"
 literatura4: .asciz "\nMMMMMMMMMMMNDNMMI???????=========????????????+========+????????8MMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMZ???????========+????????????+========?????????MMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMM???????=========????????????+========?????????MMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMM???????+========????????????+========????????IMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMI??????+========????????????+========????????8MMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMD???????========????????????+=======+????????MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMM???????=======+????????????+=======+????????MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMM???????========????????????========+???????7MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMO??????========????????????========+???????8MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMM??????+=======????????????========+???????MMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMM??????+=======+???????????+=======????????MMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMD$???+=======+???????????+=======?????$DNMMMMMMMMMMMMMMMMMMM\n"
 literatura5: .asciz "\nMMMMMMMMMMMMMMMMMMMMMMMMMMM87+=+=+???????????=++=++?7MMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMI$MMMMMMMMMMMMMMMMIMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNINMMMMMMMMMMMMMMMMIOMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMI8MMMMMMMMMMMMMMMMI8MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMIIMMMMMMMMMMMMMMMMIMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMD$IIIDMMMMMMMMMMMMMMI$NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMIIIIOMMMMMMMMMMMMMMMMMIIII7ZMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n"
+
 
 
 

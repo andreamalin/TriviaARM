@@ -28,12 +28,13 @@ main:
 	ldr r5, =nom_jugador2	/*R5 -> Nombre del jugador 2*/
 	ldr r6, =turno			/*R6 -> Turno actual */
 	mov r11, #0				/*R11 -> Contador*/
-	
+	mov r0,sp				/*Se apunta al stack pointer*/
+	bl mysrand				/*Se jala la semilla a r0*/
+
+	ldr r0,=menu
+	bl puts
 
 	opcion_menu:		/*Se muestra que ingrese una opcion del menu*/
-		ldr r0,=menu
-		bl puts
-
 		ldr r0,=formato /*Formato de impresion*/	
 		ldr r1,=opcion_ingresada	/*Se guarda lo ingresado en una variable temporal*/
 		bl scanf		/*Se lee lo ingresado por el usuario*/
@@ -61,8 +62,9 @@ main:
 
 		bl nombre_jugador2				/*Se manda a la subrutina*/
 		mov r5, r1						/*Se guarda en r5*/
-
+		
 		/*Vamos cambiando turno*/
+		mov r6, #1						/*Comienza a jugar el J1*/
 		bl jugarTurnos
 
 	/*Imprime el menu*/
@@ -84,10 +86,8 @@ main:
 		bl puts						 /* se muestra */
 	
 	/*Se sale correctamente*/
-	mov r0,#0
-	mov r3,#0
-	ldmfd sp!,{lr}
-	bx lr
+	mov r7,#1					
+	swi 0
 
 /*Interfaz amigable*/
 menu:
