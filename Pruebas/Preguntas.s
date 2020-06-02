@@ -1,3 +1,22 @@
+
+
+	.global main
+	.func main
+
+main:
+
+	ldr r0, =respuestas_ciencia
+	add r0, r0, #1
+	bl puts
+	
+
+
+	MOV R7, #1
+	SWI 0
+
+
+
+	.data
 ciencia_1:		.asciz "¿Como se llama el componente minimo que forma a los seres vivos?\na. Tejido\nb. Celula\nc. Particula" 
 ciencia_2:		.asciz "Unidad basica de la materia\na. Atomo\nb. Celula\nc. Mitocondria"
 ciencia_3:		.asciz "La  columna más a la derecha de la tabla periódica esta compuesta por\na. Haluros\nb. Gases nobles\nc. Minerales"
@@ -45,3 +64,4 @@ deportes_4:		.asciz "¿Cual es el deporte mas visto en las olimpiadas?\na. Natac
 deportes_5:		.asciz "¿Cual es el pais con mayor cantidad de mundiales de futbol?\na. Brasil\nb. Alemania\nc. Italia"
 deportes_6:		.asciz "¿Cuantos kilometros se recorren en el Tour de Francia?\na. 5600\nb. 5500\nc. 5700"
 respuestas_deportes:	.byte 'c', 'a', 'b', 'c', 'a', 'b'
+
