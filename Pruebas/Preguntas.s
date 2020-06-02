@@ -5,11 +5,17 @@
 
 main:
 
-	ldr r0, =respuestas_ciencia
-	add r0, r0, #1
-	bl puts
-	
+	ldr r1, =respuestas_ciencia
+	ldrb r0, [r1], #1
+	cmp r0, #'b'
+	bne salir
 
+imprimir:
+	ldr r0, =hola
+	bl puts
+
+	
+salir:
 
 	MOV R7, #1
 	SWI 0
@@ -17,6 +23,8 @@ main:
 
 
 	.data
+hola:			.asciz "Funciona"
+
 ciencia_1:		.asciz "¿Como se llama el componente minimo que forma a los seres vivos?\na. Tejido\nb. Celula\nc. Particula" 
 ciencia_2:		.asciz "Unidad basica de la materia\na. Atomo\nb. Celula\nc. Mitocondria"
 ciencia_3:		.asciz "La  columna más a la derecha de la tabla periódica esta compuesta por\na. Haluros\nb. Gases nobles\nc. Minerales"
