@@ -1,0 +1,238 @@
+mostrar_categoria1:
+
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
+	cmp r9, #0
+	ldreq r0, =ciencia_1
+	bleq puts
+
+	cmp r9, #1
+	ldreq r0, =ciencia_2
+	bleq puts
+
+	cmp r9, #2
+	ldreq r0, =ciencia_3
+	bleq puts
+
+	cmp r9, #3
+	ldreq r0, =ciencia_4
+	bleq puts
+
+	cmp r9, #4
+	ldreq r0, =ciencia_5
+	bleq puts
+
+	cmp r9, #5
+	ldreq r0, =ciencia_6
+	bleq puts
+
+
+	/*Pedimos la respuesta*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
+
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_ciencia		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	beq seguirTurno
+	bne incorrecta
+
+
+	
+mostrar_categoria2:
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
+	cmp r9, #0
+	ldreq r0, =literatura_1
+	bleq puts
+
+	cmp r9, #1
+	ldreq r0, =literatura_2
+	bleq puts
+
+	cmp r9, #2
+	ldreq r0, =literatura_3
+	bleq puts
+
+	cmp r9, #3
+	ldreq r0, =literatura_4
+	bleq puts
+
+	cmp r9, #4
+	ldreq r0, =literatura_5
+	bleq puts
+
+	cmp r9, #5
+	ldreq r0, =literatura_6
+	bleq puts
+
+
+	/*Pedimos la respuesta*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
+
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_literatura		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	beq seguirTurno
+	bne incorrecta
+
+mostrar_categoria3:
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
+	cmp r9, #0
+	ldreq r0, =geografia_1
+	bleq puts
+
+	cmp r9, #1
+	ldreq r0, =geografia_2
+	bleq puts
+
+	cmp r9, #2
+	ldreq r0, =geografia_3
+	bleq puts
+
+	cmp r9, #3
+	ldreq r0, =geografia_4
+	bleq puts
+
+	cmp r9, #4
+	ldreq r0, =geografia_5
+	bleq puts
+
+	cmp r9, #5
+	ldreq r0, =geografia_6
+	bleq puts
+
+	/*Pedimos la respuesta*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
+
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_geografia		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	beq seguirTurno
+	bne incorrecta
+
+mostrar_categoria4:
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
+	cmp r9, #0
+	ldreq r0, =arte_1
+	bleq puts
+
+	cmp r9, #1
+	ldreq r0, =arte_2
+	bleq puts
+
+	cmp r9, #2
+	ldreq r0, =arte_3
+	bleq puts
+
+	cmp r9, #3
+	ldreq r0, =arte_4
+	bleq puts
+
+	cmp r9, #4
+	ldreq r0, =arte_5
+	bleq puts
+
+	cmp r9, #5
+	ldreq r0, =arte_6
+	bleq puts
+
+	/*Pedimos la respuesta*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
+
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_arte		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	beq seguirTurno
+	bne incorrecta
+
+mostrar_categoria5:
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
+	cmp r9, #0
+	ldreq r0, =historia_1
+	bleq puts
+
+	cmp r9, #1
+	ldreq r0, =historia_2
+	bleq puts
+
+	cmp r9, #2
+	ldreq r0, =historia_3
+	bleq puts
+
+	cmp r9, #3
+	ldreq r0, =historia_4
+	bleq puts
+
+	cmp r9, #4
+	ldreq r0, =historia_5
+	bleq puts
+
+	cmp r9, #5
+	ldreq r0, =historia_6
+	bleq puts
+
+	/*Pedimos la respuesta*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
+
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_historia		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	beq seguirTurno
+	bne incorrecta
+
+mostrar_categoria6:
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
+	cmp r9, #0
+	ldreq r0, =deportes_1
+	bleq puts
+
+	cmp r9, #1
+	ldreq r0, =deportes_2
+	bleq puts
+
+	cmp r9, #2
+	ldreq r0, =deportes_3
+	bleq puts
+
+	cmp r9, #3
+	ldreq r0, =deportes_4
+	bleq puts
+
+	cmp r9, #4
+	ldreq r0, =deportes_5
+	bleq puts
+
+	cmp r9, #5
+	ldreq r0, =deportes_6
+	bleq puts
+
+	/*Pedimos la respuesta*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
+
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_deportes		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	beq seguirTurno
+	bne incorrecta
