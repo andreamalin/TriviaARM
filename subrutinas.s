@@ -76,19 +76,12 @@ mostrar_jugador:
 	ldr r4, =nom_jugador1
 	ldr r5, =nom_jugador2
 
-	mov r7, #0		/* Contador de preguntas buenas */
-
-	mov r1, r6
-	ldr r0, =num
-	bl printf
-	
+	mov r7, #0					/* Contador de preguntas buenas */
 	cmp r6, #1
 
 	moval r1, r4				/*Se jala el nombre del jugador actual*/		
 	movne r1, r5				/*Se jala el nombre del jugador actual*/	
 	
-	
-
 	ldr r0, = jugador_actual    /* cargar dirección de la cadena a imprimir*/ 
 	bl printf                   /* se muestra */
 
@@ -121,35 +114,45 @@ pregunta_aleatoria:
 
 	/*r8 -> categoria aleatoria      r9 -> pregunta aleatoria      r10 -> direccion de la respuesta correcta */
 	cmp r8, #0
-	b mostrar_categoria1
-	
-mostrar_categoria1:					/*CATEGORIA -> CIENCIAS*/
-	/*Comparamos que pregunta es*/
+	beq mostrar_categoria1
+	cmp r8, #1
+	beq mostrar_categoria2
+	cmp r8, #2
+	beq mostrar_categoria3
+	cmp r8, #3
+	beq mostrar_categoria4
+	cmp r8, #4
+	beq mostrar_categoria5
+	cmp r8, #5
+	beq mostrar_categoria6
+
+mostrar_categoria1:
+
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
 	cmp r9, #0
 	ldreq r0, =ciencia_1
-	bleq puts						/*Se muestra la pregunta correspondiente*/
-	ldreq r0, =aleatorios1_ciencia
+	bleq puts
+
 	cmp r9, #1
 	ldreq r0, =ciencia_2
-	bleq puts						/*Se muestra la pregunta correspondiente*/
-	ldreq r0, =aleatorios2_ciencia
+	bleq puts
+
 	cmp r9, #2
 	ldreq r0, =ciencia_3
-	bleq puts						/*Se muestra la pregunta correspondiente*/
-	ldreq r0, =aleatorios3_ciencia
+	bleq puts
+
 	cmp r9, #3
 	ldreq r0, =ciencia_4
-	bleq puts						/*Se muestra la pregunta correspondiente*/
-	ldreq r0, =aleatorios4_ciencia
+	bleq puts
+
 	cmp r9, #4
 	ldreq r0, =ciencia_5
-	bleq puts						/*Se muestra la pregunta correspondiente*/
-	ldreq r0, =aleatorios5_ciencia
+	bleq puts
+
 	cmp r9, #5
 	ldreq r0, =ciencia_6
-	bleq puts						/*Se muestra la pregunta correspondiente*/
-	ldreq r0, =aleatorios6_ciencia
-	bl puts							/*Se muestran las respuestas correspondientes*/
+	bleq puts
+
 
 	/*Pedimos la respuesta*/
 	ldr r0,=formato					/*Formato de impresion*/	
@@ -164,11 +167,235 @@ mostrar_categoria1:					/*CATEGORIA -> CIENCIAS*/
 	beq seguirTurno
 	bne incorrecta
 
-seguirTurno:
+
+	
+mostrar_categoria2:
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
+	cmp r9, #0
+	ldreq r0, =literatura_1
+	bleq puts
+
+	cmp r9, #1
+	ldreq r0, =literatura_2
+	bleq puts
+
+	cmp r9, #2
+	ldreq r0, =literatura_3
+	bleq puts
+
+	cmp r9, #3
+	ldreq r0, =literatura_4
+	bleq puts
+
+	cmp r9, #4
+	ldreq r0, =literatura_5
+	bleq puts
+
+	cmp r9, #5
+	ldreq r0, =literatura_6
+	bleq puts
+
+
+	/*Pedimos la respuesta*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
+
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_literatura		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	beq seguirTurno
+	bne incorrecta
+
+mostrar_categoria3:
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
+	cmp r9, #0
+	ldreq r0, =geografia_1
+	bleq puts
+
+	cmp r9, #1
+	ldreq r0, =geografia_2
+	bleq puts
+
+	cmp r9, #2
+	ldreq r0, =geografia_3
+	bleq puts
+
+	cmp r9, #3
+	ldreq r0, =geografia_4
+	bleq puts
+
+	cmp r9, #4
+	ldreq r0, =geografia_5
+	bleq puts
+
+	cmp r9, #5
+	ldreq r0, =geografia_6
+	bleq puts
+
+	/*Pedimos la respuesta*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
+
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_geografia		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	beq seguirTurno
+	bne incorrecta
+
+mostrar_categoria4:
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
+	cmp r9, #0
+	ldreq r0, =arte_1
+	bleq puts
+
+	cmp r9, #1
+	ldreq r0, =arte_2
+	bleq puts
+
+	cmp r9, #2
+	ldreq r0, =arte_3
+	bleq puts
+
+	cmp r9, #3
+	ldreq r0, =arte_4
+	bleq puts
+
+	cmp r9, #4
+	ldreq r0, =arte_5
+	bleq puts
+
+	cmp r9, #5
+	ldreq r0, =arte_6
+	bleq puts
+
+	/*Pedimos la respuesta*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
+
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_arte		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	beq seguirTurno
+	bne incorrecta
+
+mostrar_categoria5:
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
+	cmp r9, #0
+	ldreq r0, =historia_1
+	bleq puts
+
+	cmp r9, #1
+	ldreq r0, =historia_2
+	bleq puts
+
+	cmp r9, #2
+	ldreq r0, =historia_3
+	bleq puts
+
+	cmp r9, #3
+	ldreq r0, =historia_4
+	bleq puts
+
+	cmp r9, #4
+	ldreq r0, =historia_5
+	bleq puts
+
+	cmp r9, #5
+	ldreq r0, =historia_6
+	bleq puts
+
+	/*Pedimos la respuesta*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
+
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_historia		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	beq seguirTurno
+	bne incorrecta
+
+mostrar_categoria6:
+	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
+	cmp r9, #0
+	ldreq r0, =deportes_1
+	bleq puts
+
+	cmp r9, #1
+	ldreq r0, =deportes_2
+	bleq puts
+
+	cmp r9, #2
+	ldreq r0, =deportes_3
+	bleq puts
+
+	cmp r9, #3
+	ldreq r0, =deportes_4
+	bleq puts
+
+	cmp r9, #4
+	ldreq r0, =deportes_5
+	bleq puts
+
+	cmp r9, #5
+	ldreq r0, =deportes_6
+	bleq puts
+
+	/*Pedimos la respuesta*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
+
+	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
+	ldrb r1,[r1] 
+	ldr r0,=respuestas_deportes		/*Se apunta al vector de respuestas*/
+	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
+	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
+	beq seguirTurno
+	bne incorrecta
+
+seguirTurno: 
 	ldr r0, =respuestaCorrecta	/*La respuesta es correcta*/
 	bl puts
-	add r7, r7, #1			/* r7++ */
-	cmp r7, #3			/* Si r7 es 3, cambiar de turno */
+	/*SUMANDO RESPUESTA CORRECTA AL VECTOR*/
+
+	cmp r6, #1						/*Comparamos que jugador es para incrementar el contador*/
+	ldreq r11,=contadorJ1			/*Se apunta al vector de respuestas J1*/
+	ldrne r11,=contadorJ2			/*Se apunta al vector de respuestas J2*/
+
+	mov r10, #4						/*bytes*/
+	mul r10, r8						/*Direccion del contador correcto dentro del vector*/
+	add r11, r11, r10				/*Direccion actual*/
+
+	ldr r1, [r11]					/*Jalamos el numero a r10*/
+	add r1, r1, #1					/*Sumamos 1 al contador*/
+	str r1,[r11],r10				/*Se guarda en la posicion correspondiente de notas el valor guardado en r1*/
+	
+	cmp r1, #3
+	beq mostrarPersonaje			/*Si tiene 3 correctas de la misma categoria (y por primera vez), se gana al personaje*/
+	bne sumarCorrecta				/*De lo contrario, solo sumamos una respuesta correcta*/
+
+mostrarPersonaje:
+	cmp r8, #0
+	beq ganar_personaje1			/*Se gana el personaje de ciencias*/
+	
+	
+
+sumarCorrecta:
+	/*Sumando respuesta correcta al contador si r7 es 3, cambiar turno*/
+	add r7, r7, #1					/* r7++ */
+	cmp r7, #3						/* Si r7 es 3, cambiar de turno */
 	beq tresBuenas
 
 	b categoria_aleatoria			/*Si tiene respuesta correcta, el jugador sigue en turno*/
@@ -190,16 +417,88 @@ cambiarTurno:
 
 	b mostrar_jugador					/*Cambiamos al jugador que toque*/
 	
-finalizarTurno:
+finalizarJuego:
 	pop {r4-r12, pc}				/*Regresando sin error*/
 
 ganar_personaje1:
-	ldr r0, = ciencia            /* cargamos personaje deportes*/ 
+	ldr r0, = ciencia            /* cargamos personaje ciencias*/ 
 	bl puts						 /* se muestra */
-	ldr r0, = ciencia2            /* cargamos personaje deportes*/ 
+	ldr r0, = ciencia2            /* cargamos personaje ciencias*/ 
 	bl puts						 /* se muestra */
-	mov pc, lr 
 
+	ldr r1, =categoria1			/*Se carga la categoria ganada*/
+	ldr r0, =ganaPersonaje
+	bl printf
+
+	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
+
+ganar_personaje2:
+	ldr r0, = literatura            /* cargamos personaje literatura*/ 
+	bl puts							/* se muestra */
+	ldr r0, = literatura2            /* cargamos personaje literatura*/ 
+	bl puts						 /* se muestra */
+	ldr r0, = literatura3            /* cargamos personaje literatura*/ 
+	bl puts						 /* se muestra */
+	ldr r0, = literatura4            /* cargamos personaje literatura*/ 
+	bl puts						 /* se muestra */
+	ldr r0, = literatura5            /* cargamos personaje literatura*/ 
+	bl puts						 /* se muestra */
+
+	ldr r1, =categoria2			/*Se carga la categoria ganada*/
+	ldr r0, =ganaPersonaje
+	bl printf
+
+	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
+
+ganar_personaje3:
+	ldr r0, = mundo            /* cargamos personaje geografia*/ 
+	bl puts						 /* se muestra */
+	ldr r0, = mundo2            /* cargamos personaje geografia*/ 
+	bl puts						 /* se muestra */
+	ldr r0, = mundo3            /* cargamos personaje geografia*/ 
+	bl puts						 /* se muestra */
+
+	ldr r1, =categoria3			/*Se carga la categoria ganada*/
+	ldr r0, =ganaPersonaje
+	bl printf
+
+	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
+
+ganar_personaje4:
+	ldr r0, = arte            /* cargamos personaje arte*/ 
+	bl puts						 /* se muestra */
+	ldr r0, = arte2            /* cargamos personaje arte*/ 
+	bl puts						 /* se muestra */
+
+	ldr r1, =categoria4			/*Se carga la categoria ganada*/
+	ldr r0, =ganaPersonaje
+	bl printf
+
+	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
+
+ganar_personaje5:
+	ldr r0, = historia            /* cargamos personaje historia*/ 
+	bl puts						 /* se muestra */
+	ldr r0, = historia2            /* cargamos personaje historia*/ 
+	bl puts						 /* se muestra */
+	ldr r0, = historia3            /* cargamos personaje historia*/ 
+	bl puts						 /* se muestra */
+
+	ldr r1, =categoria5			/*Se carga la categoria ganada*/
+	ldr r0, =ganaPersonaje
+	bl printf
+
+	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
+
+ganar_personaje6:
+	ldr r0, = deporte            /* cargamos personaje deportes*/ 
+	bl puts						 /* se muestra */
+
+	ldr r1, =categoria6			/*Se carga la categoria ganada*/
+	ldr r0, =ganaPersonaje
+	bl printf
+
+	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
 
 .data
 respuesta:	.byte	' '
@@ -213,31 +512,71 @@ categoria_actual:.asciz  "\nCategoria actual: %s\n"
 formato:		.asciz  "\n%s"
 num:			.asciz	"\n%d\n"
 
-categoria1:		.asciz "Entretenimiento  y Deportes"
+categoria1:		.asciz "Ciencia y Tecnologia" 
 categoria2:		.asciz "Literatura"
-categoria3:		.asciz "Ciencia y Tecnologia"
-categoria4:		.asciz "Geografia"
-categoria5:		.asciz "Arte"
-categoria6:		.asciz "Historia"
+categoria3:		.asciz "Geografia"
+categoria4:		.asciz "Arte"
+categoria5:		.asciz "Historia"
+categoria6:		.asciz "Entretenimiento  y Deportes"
 
 respuestaCorrecta:		.asciz "\nLo ingresado es correcto! Sigues jugando"
 respuestaIncorrecta:	.asciz "\nLo ingresado es incorrecto! Pierdes turno"
-tresSeguidas:		.asciz "\nLograste tres seguidas, cambio de turno!"
+tresSeguidas:			.asciz "\nLograste tres seguidas, cambio de turno!"
+ganaPersonaje:			.asciz "\nTe has ganado el pesonaje de: %s !"
+
+/*Los contadores llevan el orden de las categorias, al llegar a 3 se gana al personaje*/
+contadorJ1:		.word 0, 0, 0, 0, 0, 0
+contadorJ2:		.word 0, 0, 0, 0, 0, 0
 
 /*PREGUNTAS PARA -> CIENCIAS*/
-ciencia_1:				.asciz "\nComo se llama el componente minimo que forma a los seres vivos?"
-ciencia_2:				.asciz "\nUnidad basica de la materia"
-ciencia_3:				.asciz "\nLa  columna más a la derecha de la tabla periódica esta compuesta por"
-ciencia_4:				.asciz "\nQue elemento tiene el simbolo Cu?"
-ciencia_5:				.asciz "\nCiencia que estudia los seres vivos"
-ciencia_6:				.asciz "\nLa velocidad a la que viaja la luz es"
-aleatorios1_ciencia:	.asciz "a. Tejido\nb. Celula\nc. Particula"
-aleatorios2_ciencia:	.asciz "a. Atomo\nb. Celula\nc. Mitocondria"
-aleatorios3_ciencia:	.asciz "a. Haluros\nb. Gases nobles\nc. Minerales"
-aleatorios4_ciencia:	.asciz "a. Cobre\nb. Carbon\nc. Calcio"
-aleatorios5_ciencia:	.asciz "a. Viviologia\nb. Organismologia\nc. Biologia"
-aleatorios6_ciencia:	.asciz "a. 300,000 m/s\nb. 300,000 km/s\nc. 30,000 km/h"
-respuestas_ciencia:		.byte  'b', 'a', 'b', 'a', 'c', 'b'
+ciencia_1:		.asciz "\nComo se llama el componente minimo que forma a los seres vivos?\na. Tejido\nb. Celula\nc. Particula" 
+ciencia_2:		.asciz "\nUnidad basica de la materia\na. Atomo\nb. Celula\nc. Mitocondria"
+ciencia_3:		.asciz "\nLa  columna más a la derecha de la tabla periódica esta compuesta por\na. Haluros\nb. Gases nobles\nc. Minerales"
+ciencia_4:		.asciz "\nQue elemento tiene el simbolo Cu?\na. Cobre\nb. Carbon\nc. Calcio"
+ciencia_5:		.asciz "\nCiencia que estudia los seres vivos\na. Viviologia\nb. Organismologia\nc. Biologia"
+ciencia_6:		.asciz "\nLa velocidad a la que viaja la luz es\na. 300,000 m/s\nb. 300,000 km/s\nc. 30,000 km/h"
+respuestas_ciencia:	.byte  'b', 'a', 'b', 'a', 'c', 'b'
+
+literatura_1:		.asciz "\nQuien escribio 'La Iliada'?\na. Homero\nb. Herodoto\nc. Seneca"     
+literatura_2:		.asciz "\nQuien es el autor de la 'Divina comedia'?\na. Petrarca\nb. Virgilio\nc. Dante Alighier"
+literatura_3:		.asciz "\nQue autor NO pertenece al boom latinoamericano?\na. Julio Cortazar\nb. Ruben Dario\nc. Gabriel Garcia Marquez"
+literatura_4:		.asciz "\nObra literaria mas vendida de la historia\na. El Hobbit\nb. El senor de los Anillos\nc. Don Quijote de la Mancha"
+literatura_5:		.asciz "\nAutor que escribe en el genero de terror\na. Stephen King\nb. JK Rowling\nc. William Shakespeare"
+literatura_6:		.asciz "\nCual de los autores SI pertenece al genero del realismo magico y es guatemalteco?\na. Frida Kahlo\nb. Gabriel Garcia Marquez\nc. Miguel Angel Asturias"
+respuestas_literatura:	.byte 'a', 'c', 'b', 'c', 'a', 'c'
+
+geografia_1:		.asciz "\nContinente con la mayor cantidad de paises\na. Africa\nb. Europa\nc. Asia"  
+geografia_2:		.asciz "\nPais mas grande del mundo\na. China\nb. Rusia\nc. Canada"
+geografia_3:		.asciz "\nDe qué tiene forma Italia?\na. Camisa\nb. Sombrero\nc. Bota"
+geografia_4:		.asciz "\nPais con la mayor poblacion del mundo\na. China\nb. India\nc. Brasil"
+geografia_5:		.asciz "\nDonde se encuentra el rio mas grande de Africa?\na. Argelia\nb. Egipto\nc. Madagascar"
+geografia_6:		.asciz "\nCual de los siguientes es el lago mas grande del mundo?\na. Mar Rojo\nb. Mar Mediterraneo\nc. Mar Caspio"
+respuestas_geografia:	.byte 'a', 'b', 'c', 'a', 'b', 'c'
+
+arte_1:			.asciz "\nA que movimiento pertenecio Pablo Picasso?\na. Cubismo\nb. Surrealismo\nc. Realismo"
+arte_2:			.asciz "\nArtista que se corto su propia oreja\na. Donatello\nb. Leonardo\nc. Vincent Van Gogh"
+arte_3:			.asciz "\nArtista y miembro de las tortugas ninja\na. Claude Monet\nb. Miguel Angel\nc. Leonardo Da Vinci"
+arte_4:			.asciz "\nCual era el 6o nombre de Picasso?\na. Juan\nb. Francisco de Paula\nc. Nepomuceno"
+arte_5:			.asciz "\nQuien fue el primer arquitecto encargado de 'La Sagrada Familia'?\na. Francisco del Villar\nb. Antonio Gaudi\nc. Juan Rubio"
+arte_6:			.asciz "\nCual de estos era inventor a parte de ser artista?\na. Dali\nb. Duchamp\nc. Da Vinci"
+respuestas_arte:	.byte 'a', 'c', 'b', 'c', 'b', 'c'
+
+historia_1:		.asciz "\nCuantas veces fue apunalado el emperador Julio Cesar?\na. 23\nb. 21\nc. 24"
+historia_2:		.asciz "\nDonde se asento la primera civilizacion?\na. Rio Nilo\nb. Mesopotamia\nc. Amazonas"
+historia_3:		.asciz "\nLugar donde cruzan los humanos a América\na. Estrecho de Bering\nb. Estrecho de Gibraltar\nc. Estrecho de Malaca"
+historia_4:		.asciz "\nCiudad destruida por la erupcion del Monte Vesuvio\na. Troya\nb. Atenas\nc. Pompeya"
+historia_5:		.asciz "\nCaracteristica geografica donde se asientan las civilizaciones\na. Rios\nb. Montanas\nc. Playas"
+historia_6:		.asciz "\nQuien estaba al mando del mayor imperio en la historia?\na. La corona inglesa\nb. Genghis Khan\nc. Alejandro el Grande"
+respuestas_historia:	.byte 'a', 'b', 'a', 'c', 'a', 'a'
+
+deportes_1:		.asciz "\nQue pelicula de la trilogia del Senor de los Anillos gano todos los oscares a los cuales fue nominada?\na. La Comunidad del Anillo\nb. Las Dos Torres\nc. El Retorno del Rey"
+deportes_2:		.asciz "\nArtista mas vendido de la historia\na. Elvis Presley\nb. Michael Jackson\nc. Elton John"
+deportes_3:		.asciz "\nCual es el videojuego mas vendido de la historia?\na. Tetris\nb. Minecraft\nc. GTAV"
+deportes_4:		.asciz "\nCual es el deporte mas visto en las olimpiadas?\na. Natacion\nb. Atletismo\nc. Gimnasia"
+deportes_5:		.asciz "\nCual es el pais con mayor cantidad de mundiales de futbol?\na. Brasil\nb. Alemania\nc. Italia"
+deportes_6:		.asciz "\nCuantos kilometros se recorren en el Tour de Francia?\na. 5600\nb. 5500\nc. 5700"
+respuestas_deportes:	.byte 'c', 'a', 'b', 'c', 'a', 'b'
+
 
 /*PERSONAJES DENTRO DE LA TRIVIA*/
 ciencia: .asciz "\n..II7IIIIIIII$NIIIIIIIIIIIIIII~~I.......\n..IIIIIIIIIINNIIIII78MI7IIIIIII=~+......\n..IIIIIIIIIIIIIIIIII7II7IIIIIII=7.......\n....,,,$$$$$$$$$$$$$$7$$$$77+,.....I.II.\n.......777777$$7$7777$777777=.....,I,I,.\n.......7777777NN777NM7777777=....,III~7:\n.......7777777NN777NM7777777=......III..\n.......7777777NN777NN7777777=......I=...\n.......777$$$7MN$77MM777$777=......I....\n.......7777777$$$777$$777777=......I....\n.......777777887$777OD777777=.....?+....\n.......7777777$$$77$77777777=....,I.....\n.......777777777777777777777=...,I,.....\n.......777777777777777777777=..II.......\n.......7777777777777777777777II.........\n.......777777777777777777777=...........\n.......77777777777777777777$=...........\n.......777777777777777777777=...........\n......I777777777777777777777=...........\n.....II777777777777777777777=...........\n....,I.77777777777777777+~77=...........\n....7~.7777777777777777~~~77=...........\n....I..7777777777777777~~~77=...........\n...:I..7777777777777777~~~77=...........\n"
