@@ -65,7 +65,7 @@ main:
 		
 		/*Vamos cambiando turno*/
 		mov r6, #1						/*Comienza a jugar el J1*/
-		bl jugarTurnos
+		bl comenzarJuego
 
 	/*Imprime el menu*/
 	impresion_menu:

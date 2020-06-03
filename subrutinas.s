@@ -8,6 +8,11 @@ const2:	.word	12345
 .text
 .global myrand, mysrand
 
+mysrand:				/*Retorna el aleatorio*/
+	ldr r1, =seed		/*Se jala la semilla*/
+	str r0, [r1]		/*Se guarda R0 en R1*/
+	mov pc, lr			/*Se retorna*/
+
 myrand:					/*Genera el aleatorio*/
 	ldr r1, =seed		/*Se jala el valor de la semilla*/
 	ldr r0, [r1]		/*Se lee el valor de la semilla*/
@@ -20,10 +25,6 @@ myrand:					/*Genera el aleatorio*/
 	lsr r0, #17			/*Logical Shift Right*/
 	mov pc, lr			/*Retorno*/
 
-mysrand:				/*Retorna el aleatorio*/
-	ldr r1, =seed		/*Se jala la semilla*/
-	str r0, [r1]		/*Se guarda R0 en R1*/
-	mov pc, lr			/*Se retorna*/
 
 
 .text
@@ -38,10 +39,10 @@ nombre_jugador1:
 	bl puts					/* se muestra */	
 
 	ldr r0,=formato			/*Formato de impresion*/	
-	ldr r1,=nom_jugador		/*Se guarda lo ingresado dentro de nom_jugador*/
+	ldr r1,=nom_jugador1		/*Se guarda lo ingresado dentro de nom_jugador*/
 	bl scanf				/*Se lee lo ingresado por el usuario*/
 	
-	ldr r1,=nom_jugador		/*Se obtiene la direccion de nom_jugador*/
+	ldr r1,=nom_jugador1		/*Se obtiene la direccion de nom_jugador*/
 	
 	pop {r4-r12, pc}		/*Regresando sin error*/
 
@@ -58,20 +59,40 @@ nombre_jugador2:
 	bl puts					/* se muestra */	
 
 	ldr r0,=formato			/*Formato de impresion*/	
-	ldr r1,=nom_jugador		/*Se guarda lo ingresado dentro de nom_jugador*/
+	ldr r1,=nom_jugador2		/*Se guarda lo ingresado dentro de nom_jugador*/
 	bl scanf				/*Se lee lo ingresado por el usuario*/
 	
-	ldr r1,=nom_jugador		/*Se obtiene la direccion de nom_jugador*/
+	ldr r1,=nom_jugador2		/*Se obtiene la direccion de nom_jugador*/
 	
 	pop {r4-r12, pc}		/*Regresando sin error*/
 
 /*	Parametros	> r6 turno actual, r5 nombre jugador 2, r4 nombre jugador 1
 	Retorna		>  */
-.global jugarTurnos
-jugarTurnos:
+.global comenzarJuego
+comenzarJuego:
 	push {r4-r12, lr}
 
-aleatorios:
+mostrar_jugador:
+	ldr r4, =nom_jugador1
+	ldr r5, =nom_jugador2
+
+	mov r1, r6
+	ldr r0, =num
+	bl printf
+	
+	cmp r6, #1
+	moveq r1, r4				/*Se jala el nombre del jugador actual*/
+	movne r1, r5				/*Se jala el nombre del jugador actual*/
+
+	ldr r0, = jugador_actual    /* cargar dirección de la cadena a imprimir*/ 
+	bl printf                   /* se muestra */
+
+
+categoria_aleatoria:
+	mov r8, #0
+	mov r9, #0
+	mov r10, #0
+
 	bl myrand					/*R0 contendra el numero aleatorio generado*/
 	push {r0}					/*R0 se mete al stack*/
 
@@ -79,13 +100,9 @@ aleatorios:
 	and r1,r1,#5				/*R1 llevara el limite superior de numero a generar -> Cantidad de categorias*/
 	mov r8, r1					/*Se jala a r8 el numero aleatorio*/
 	pop {r0}					/*Se saca r0 del stack*/
-	
-	cmp r6, #1
-	moveq r1, r4				/*Se jala el nombre del jugador actual*/
-	movne r1, r5				
-	ldr r0, = jugador_actual    /* cargar dirección de la cadena a imprimir*/ 
-	bl printf                   /* se muestra */
 
+
+pregunta_aleatoria:
 	bl myrand					/*R0 contendra el numero aleatorio generado*/
 	push {r0}					/*R0 se mete al stack*/
 
@@ -94,7 +111,7 @@ aleatorios:
 	mov r9, r1					/*Se jala a r9 el numero aleatorio*/
 	pop {r0}					/*Se saca r0 del stack*/
 
-	mov r10, #4					/*bytes*/
+	mov r10, #1					/*bytes*/
 	mul r10, r9					/*Direccion de la respuesta correcta dentro del vector*/
 
 	/*r8 -> categoria aleatoria      r9 -> pregunta aleatoria      r10 -> direccion de la respuesta correcta */
@@ -130,21 +147,35 @@ mostrar_categoria1:					/*CATEGORIA -> CIENCIAS*/
 	bl puts							/*Se muestran las respuestas correspondientes*/
 
 	/*Pedimos la respuesta*/
-	ldr r0,=formato				/*Formato de impresion*/	
-	ldr r1,=respuesta			/*Se guarda lo ingresado en una variable temporal*/
-	bl scanf					/*Se lee lo ingresado por el usuario*/
+	ldr r0,=formato					/*Formato de impresion*/	
+	ldr r1,=respuesta				/*Se guarda lo ingresado en una variable temporal*/
+	bl scanf						/*Se lee lo ingresado por el usuario*/
 
 	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
 	ldrb r1,[r1] 
 	ldr r0,=respuestas_ciencia		/*Se apunta al vector de respuestas*/
 	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
 	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
-	ldreq r0, =respuestaCorrecta	/*La respuesta es correcta*/
-	ldrne r0, =respuestaIncorrecta	/*La respuesta es incorrecta*/
+	beq seguirTurno
+	bne cambiarTurno
+
+seguirTurno:
+	ldr r0, =respuestaCorrecta	/*La respuesta es correcta*/
 	bl puts
+	b categoria_aleatoria			/*Si tiene respuesta correcta, el jugador sigue en turno*/
+
+cambiarTurno:
+	ldr r0, =respuestaIncorrecta	/*La respuesta es incorrecta*/
+	bl puts
+
+	cmp r6, #1
+	moveq r6, #2					/*Si el jugador actual es 1, se cambia a jugador 2*/
+	movne r6, #1					/*Si el jugador actual es 2, se cambia a jugador 1*/
+
+	b mostrar_jugador					/*Cambiamos al jugador que toque*/
 	
 finalizarTurno:
-	pop {r4-r12, pc}			/*Regresando sin error*/
+	pop {r4-r12, pc}				/*Regresando sin error*/
 
 ganar_personaje1:
 	ldr r0, = ciencia            /* cargamos personaje deportes*/ 
@@ -157,7 +188,8 @@ ganar_personaje1:
 .data
 respuesta:	.byte	' '
 
-nom_jugador:	.asciz "            "
+nom_jugador1:	.asciz "            "
+nom_jugador2:	.asciz "            "
 ingreso_nom:	.asciz "\nHola jugador 1! Ingresa tu nombre:"
 ingreso_nom2:	.asciz "\nHola jugador 2! Ingresa tu nombre:"
 jugador_actual:	.asciz  "\nEs turno de: %s"
@@ -176,12 +208,12 @@ respuestaCorrecta:		.asciz "\nLo ingresado es correcto! Sigues jugando"
 respuestaIncorrecta:	.asciz "\nLo ingresado es incorrecto! Pierdes turno"
 
 /*PREGUNTAS PARA -> CIENCIAS*/
-ciencia_1:	.asciz "\nComo se llama el componente minimo que forma a los seres vivos?"
-ciencia_2:	.asciz "\nUnidad basica de la materia"
-ciencia_3:	.asciz "\nLa  columna más a la derecha de la tabla periódica esta compuesta por"
-ciencia_4:	.asciz "\nQue elemento tiene el simbolo Cu?"
-ciencia_5:	.asciz "\nCiencia que estudia los seres vivos"
-ciencia_6:	.asciz "\nLa velocidad a la que viaja la luz es"
+ciencia_1:				.asciz "\nComo se llama el componente minimo que forma a los seres vivos?"
+ciencia_2:				.asciz "\nUnidad basica de la materia"
+ciencia_3:				.asciz "\nLa  columna más a la derecha de la tabla periódica esta compuesta por"
+ciencia_4:				.asciz "\nQue elemento tiene el simbolo Cu?"
+ciencia_5:				.asciz "\nCiencia que estudia los seres vivos"
+ciencia_6:				.asciz "\nLa velocidad a la que viaja la luz es"
 aleatorios1_ciencia:	.asciz "a. Tejido\nb. Celula\nc. Particula"
 aleatorios2_ciencia:	.asciz "a. Atomo\nb. Celula\nc. Mitocondria"
 aleatorios3_ciencia:	.asciz "a. Haluros\nb. Gases nobles\nc. Minerales"
