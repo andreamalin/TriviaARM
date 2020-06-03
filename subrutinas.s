@@ -38,7 +38,7 @@ nombre_jugador1:
 	ldr r0,=ingreso_nom     /* cargar dirección de la cadena a imprimir*/ 
 	bl puts					/* se muestra */	
 
-	ldr r0,=formato			/*Formato de impresion*/	
+	ldr r0,=formato			/*Formato de entrada*/	
 	ldr r1,=nom_jugador1		/*Se guarda lo ingresado dentro de nom_jugador*/
 	bl scanf				/*Se lee lo ingresado por el usuario*/
 	
@@ -58,7 +58,7 @@ nombre_jugador2:
 	ldr r0,=ingreso_nom2     /* cargar dirección de la cadena a imprimir*/ 
 	bl puts					/* se muestra */	
 
-	ldr r0,=formato			/*Formato de impresion*/	
+	ldr r0,=formato			/*Formato de entrada*/	
 	ldr r1,=nom_jugador2		/*Se guarda lo ingresado dentro de nom_jugador*/
 	bl scanf				/*Se lee lo ingresado por el usuario*/
 	
@@ -76,13 +76,18 @@ mostrar_jugador:
 	ldr r4, =nom_jugador1
 	ldr r5, =nom_jugador2
 
+	mov r7, #0		/* Contador de preguntas buenas */
+
 	mov r1, r6
 	ldr r0, =num
 	bl printf
 	
 	cmp r6, #1
-	moveq r1, r4				/*Se jala el nombre del jugador actual*/
-	movne r1, r5				/*Se jala el nombre del jugador actual*/
+
+	moval r1, r4				/*Se jala el nombre del jugador actual*/		
+	movne r1, r5				/*Se jala el nombre del jugador actual*/	
+	
+	
 
 	ldr r0, = jugador_actual    /* cargar dirección de la cadena a imprimir*/ 
 	bl printf                   /* se muestra */
@@ -136,7 +141,7 @@ mostrar_categoria1:					/*CATEGORIA -> CIENCIAS*/
 	ldreq r0, =ciencia_4
 	bleq puts						/*Se muestra la pregunta correspondiente*/
 	ldreq r0, =aleatorios4_ciencia
-	cmp r9, #45
+	cmp r9, #4
 	ldreq r0, =ciencia_5
 	bleq puts						/*Se muestra la pregunta correspondiente*/
 	ldreq r0, =aleatorios5_ciencia
@@ -157,16 +162,27 @@ mostrar_categoria1:					/*CATEGORIA -> CIENCIAS*/
 	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
 	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
 	beq seguirTurno
-	bne cambiarTurno
+	bne incorrecta
 
 seguirTurno:
 	ldr r0, =respuestaCorrecta	/*La respuesta es correcta*/
 	bl puts
+	add r7, r7, #1			/* r7++ */
+	cmp r7, #3			/* Si r7 es 3, cambiar de turno */
+	beq tresBuenas
+
 	b categoria_aleatoria			/*Si tiene respuesta correcta, el jugador sigue en turno*/
 
-cambiarTurno:
+tresBuenas:
+	ldr r0, =tresSeguidas
+	bl puts
+	b cambiarTurno
+
+incorrecta:
 	ldr r0, =respuestaIncorrecta	/*La respuesta es incorrecta*/
 	bl puts
+
+cambiarTurno:
 
 	cmp r6, #1
 	moveq r6, #2					/*Si el jugador actual es 1, se cambia a jugador 2*/
@@ -206,6 +222,7 @@ categoria6:		.asciz "Historia"
 
 respuestaCorrecta:		.asciz "\nLo ingresado es correcto! Sigues jugando"
 respuestaIncorrecta:	.asciz "\nLo ingresado es incorrecto! Pierdes turno"
+tresSeguidas:		.asciz "\nLograste tres seguidas, cambio de turno!"
 
 /*PREGUNTAS PARA -> CIENCIAS*/
 ciencia_1:				.asciz "\nComo se llama el componente minimo que forma a los seres vivos?"

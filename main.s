@@ -35,7 +35,7 @@ main:
 	bl puts
 
 	opcion_menu:		/*Se muestra que ingrese una opcion del menu*/
-		ldr r0,=formato /*Formato de impresion*/	
+		ldr r0,=formato /*Formato de entrada*/	
 		ldr r1,=opcion_ingresada	/*Se guarda lo ingresado en una variable temporal*/
 		bl scanf		/*Se lee lo ingresado por el usuario*/
 		
