@@ -70,8 +70,8 @@ main:
 
 	/*Imprime el menu*/
 	impresion_menu:
-		ldr r0, = menu				/* cargar dirección de la cadena a imprimir*/ 
-		bl puts						/* se muestra */
+		ldr r0, = menu              /* cargar dirección de la cadena a imprimir*/ 
+		bl puts						 /* se muestra */
 		b opcion_menu
 
 	/*Imprime error en opcion elegida*/
@@ -92,7 +92,7 @@ main:
 
 /*Interfaz amigable*/
 menu:
-    .asciz "\nBIENVENIDO A LA TRIVIA-ARM\n    Que deseas hacer? \n1. Jugar una partida\n2. Salir del programa \nPor favor, ingrese un numero:"
+    .asciz "\nBIENVENIDO A LA TRIVIA-ARM\n    Que deseas hacer? \n1. Ingresar los nombres de los jugadores\n2. Salir del programa \nPor favor, ingrese un numero:"
 
 salir:
 	.asciz "\nTe esperamos pronto para otra partida!\n"
