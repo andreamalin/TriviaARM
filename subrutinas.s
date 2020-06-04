@@ -1,5 +1,9 @@
 /*Subrutinas que llevan a cabo las operaciones de la trivia ARM*/
 
+
+/* Subrutinas mysrand y myrand tomadas de:
+Villena, A. & Asenjo, R. & Corbera, F. Practicas basadas en Raspberry Pi */
+
 .data
 seed: 	.word 	1
 const1:	.word	1103515245
@@ -26,11 +30,17 @@ myrand:					/*Genera el aleatorio*/
 	mov pc, lr			/*Retorno*/
 
 
+/*Subrutinas encargadas de ir alternando turnos, dar personajes,
+pedir nombres*/
 
+
+.data
+nom_jugador1:	.asciz "            "
+nom_jugador2:	.asciz "            "
 .text
 
-/*	Parametros	> r1 el nombre del jugador 1
-	Retorna		> r0 con el nombre del jugador	 */
+/*	Parametros	> r0 con el nombre del jugador 1
+	Retorna		> r1 con el nombre del jugador	 */
 .global nombre_jugador1
 nombre_jugador1:
 	push {r4-r12, lr}
@@ -39,55 +49,50 @@ nombre_jugador1:
 	bl puts					/* se muestra */	
 
 	ldr r0,=formato			/*Formato de entrada*/	
-	ldr r1,=nom_jugador1		/*Se guarda lo ingresado dentro de nom_jugador*/
+	ldr r1,=nom_jugador1	/*Se guarda lo ingresado dentro de nom_jugador*/
 	bl scanf				/*Se lee lo ingresado por el usuario*/
 	
-	ldr r1,=nom_jugador1		/*Se obtiene la direccion de nom_jugador*/
+	ldr r1,=nom_jugador1	/*Se obtiene la direccion de nom_jugador*/
 	
 	pop {r4-r12, pc}		/*Regresando sin error*/
 
 
-
-
-/*	Parametros	> r1 el nombre del jugador
-	Retorna		> r0 con el nombre del jugador 2 */
+/*	Parametros	> r0 con el nombre del jugador
+	Retorna		> r1 con el nombre del jugador 2 */
 .global nombre_jugador2
 nombre_jugador2:
 	push {r4-r12, lr}
 
-	ldr r0,=ingreso_nom2     /* cargar dirección de la cadena a imprimir*/ 
+	ldr r0,=ingreso_nom2    /* cargar dirección de la cadena a imprimir*/ 
 	bl puts					/* se muestra */	
 
 	ldr r0,=formato			/*Formato de entrada*/	
-	ldr r1,=nom_jugador2		/*Se guarda lo ingresado dentro de nom_jugador*/
+	ldr r1,=nom_jugador2	/*Se guarda lo ingresado dentro de nom_jugador*/
 	bl scanf				/*Se lee lo ingresado por el usuario*/
 	
-	ldr r1,=nom_jugador2		/*Se obtiene la direccion de nom_jugador*/
+	ldr r1,=nom_jugador2	/*Se obtiene la direccion de nom_jugador*/
 	
 	pop {r4-r12, pc}		/*Regresando sin error*/
 
-/*	Parametros	> r6 turno actual, r5 nombre jugador 2, r4 nombre jugador 1
-	Retorna		>  */
+
+
+/*	Parametros	> r6 turno actual, r5 nombre jugador 2, r4 nombre jugador 1  */
 .global comenzarJuego
 comenzarJuego:
 	push {r4-r12, lr}
+	ldr r12, =nom_jugador1
 
 mostrar_jugador:
-	ldr r4, =nom_jugador1
-	ldr r5, =nom_jugador2
-
 	mov r7, #0					/* Contador de preguntas buenas */
-	cmp r6, #1
-
-	moval r1, r4				/*Se jala el nombre del jugador actual*/		
-	movne r1, r5				/*Se jala el nombre del jugador actual*/	
-	
+	cmp r6, #1					/* Comparamos cual es el jugador actual*/
+	ldreq r1, =nom_jugador1		/*Se jala el nombre del jugador 1*/	
+	ldrne r1, =nom_jugador2		/*Se jala el nombre del jugador 2*/	
 	ldr r0, = jugador_actual    /* cargar dirección de la cadena a imprimir*/ 
 	bl printf                   /* se muestra */
 
 
 categoria_aleatoria:
-	mov r8, #0
+	mov r8, #0					/*Reiniciando parametros*/
 	mov r9, #0
 	mov r10, #0
 
@@ -99,7 +104,7 @@ categoria_aleatoria:
 	mov r8, r1					/*Se jala a r8 el numero aleatorio*/
 	pop {r0}					/*Se saca r0 del stack*/
 
-
+/*r8 -> categoria aleatoria*/
 pregunta_aleatoria:
 	bl myrand					/*R0 contendra el numero aleatorio generado*/
 	push {r0}					/*R0 se mete al stack*/
@@ -113,6 +118,7 @@ pregunta_aleatoria:
 	mul r10, r9					/*Direccion de la respuesta correcta dentro del vector*/
 
 	/*r8 -> categoria aleatoria      r9 -> pregunta aleatoria      r10 -> direccion de la respuesta correcta */
+
 	cmp r8, #0
 	beq mostrar_categoria1
 	cmp r8, #1
@@ -126,8 +132,9 @@ pregunta_aleatoria:
 	cmp r8, #5
 	beq mostrar_categoria6
 
+/*r8 -> categoria aleatoria      r9 -> pregunta aleatoria      r10 -> direccion de la respuesta correcta */
+/* CATEGORIA -> CIENCIAS */
 mostrar_categoria1:
-
 	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
 	cmp r9, #0
 	ldreq r0, =ciencia_1
@@ -168,7 +175,8 @@ mostrar_categoria1:
 	bne incorrecta
 
 
-	
+/*r8 -> categoria aleatoria      r9 -> pregunta aleatoria      r10 -> direccion de la respuesta correcta */
+/* CATEGORIA -> LITERATURA */
 mostrar_categoria2:
 	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
 	cmp r9, #0
@@ -203,12 +211,14 @@ mostrar_categoria2:
 
 	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
 	ldrb r1,[r1] 
-	ldr r0,=respuestas_literatura		/*Se apunta al vector de respuestas*/
+	ldr r0,=respuestas_literatura	/*Se apunta al vector de respuestas*/
 	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
 	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
 	beq seguirTurno
 	bne incorrecta
 
+/*r8 -> categoria aleatoria      r9 -> pregunta aleatoria      r10 -> direccion de la respuesta correcta */
+/* CATEGORIA -> GEOGRAFIA */
 mostrar_categoria3:
 	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
 	cmp r9, #0
@@ -242,12 +252,14 @@ mostrar_categoria3:
 
 	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
 	ldrb r1,[r1] 
-	ldr r0,=respuestas_geografia		/*Se apunta al vector de respuestas*/
+	ldr r0,=respuestas_geografia	/*Se apunta al vector de respuestas*/
 	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
 	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
 	beq seguirTurno
 	bne incorrecta
 
+/*r8 -> categoria aleatoria      r9 -> pregunta aleatoria      r10 -> direccion de la respuesta correcta */
+/* CATEGORIA -> ARTE */
 mostrar_categoria4:
 	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
 	cmp r9, #0
@@ -281,12 +293,14 @@ mostrar_categoria4:
 
 	ldr r1,=respuesta				/*Se apunta a lo ingresado*/
 	ldrb r1,[r1] 
-	ldr r0,=respuestas_arte		/*Se apunta al vector de respuestas*/
+	ldr r0,=respuestas_arte			/*Se apunta al vector de respuestas*/
 	ldrb r0,[r0,r10] 				/*Apuntamos a la respuesta correcta dependiendo de la pregunta*/
 	cmp r1, r0						@Se compara respuesta ingresada y respuesta correcta
 	beq seguirTurno
 	bne incorrecta
 
+/*r8 -> categoria aleatoria      r9 -> pregunta aleatoria      r10 -> direccion de la respuesta correcta */
+/* CATEGORIA -> HISTORIA */
 mostrar_categoria5:
 	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
 	cmp r9, #0
@@ -326,6 +340,8 @@ mostrar_categoria5:
 	beq seguirTurno
 	bne incorrecta
 
+/*r8 -> categoria aleatoria      r9 -> pregunta aleatoria      r10 -> direccion de la respuesta correcta */
+/* CATEGORIA -> DEPORTES Y ENTRETENIMIENTO */
 mostrar_categoria6:
 	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
 	cmp r9, #0
@@ -365,8 +381,9 @@ mostrar_categoria6:
 	beq seguirTurno
 	bne incorrecta
 
+/*r0 -> respuesta ingresada      r6 -> jugador actual      r10 -> direccion del contador correcto	r11 -> contador extra para direccionar los vectores */
 seguirTurno: 
-	ldr r0, =respuestaCorrecta	/*La respuesta es correcta*/
+	ldr r0, =respuestaCorrecta		/*La respuesta es correcta*/
 	bl puts
 	/*SUMANDO RESPUESTA CORRECTA AL VECTOR*/
 
@@ -386,36 +403,39 @@ seguirTurno:
 	beq mostrarPersonaje			/*Si tiene 3 correctas de la misma categoria (y por primera vez), se gana al personaje*/
 	bne sumarCorrecta				/*De lo contrario, solo sumamos una respuesta correcta*/
 
+/*r8 -> categoria aleatoria */
 mostrarPersonaje:
 	cmp r8, #0
 	beq ganar_personaje1			/*Se gana el personaje de ciencias*/
-	
-	
 
+/*r7 -> cantidad de respuestas correctas por ronda */
 sumarCorrecta:
 	/*Sumando respuesta correcta al contador si r7 es 3, cambiar turno*/
 	add r7, r7, #1					/* r7++ */
 	cmp r7, #3						/* Si r7 es 3, cambiar de turno */
-	beq tresBuenas
+	beq tresBuenas					/* Se cambia turno */
 
 	b categoria_aleatoria			/*Si tiene respuesta correcta, el jugador sigue en turno*/
 
+/*r0 -> mensaje tres respuestas correctas */
 tresBuenas:
 	ldr r0, =tresSeguidas
 	bl puts
 	b cambiarTurno
 
+/*r0 -> mensaje respuesta incorrecta */
 incorrecta:
 	ldr r0, =respuestaIncorrecta	/*La respuesta es incorrecta*/
 	bl puts
 
-cambiarTurno:
 
+/*r6 -> turno actual  */
+cambiarTurno:
 	cmp r6, #1
 	moveq r6, #2					/*Si el jugador actual es 1, se cambia a jugador 2*/
 	movne r6, #1					/*Si el jugador actual es 2, se cambia a jugador 1*/
 
-	b mostrar_jugador					/*Cambiamos al jugador que toque*/
+	b mostrar_jugador				/*Cambiamos al jugador que toque*/
 	
 finalizarJuego:
 	pop {r4-r12, pc}				/*Regresando sin error*/
@@ -423,7 +443,7 @@ finalizarJuego:
 ganar_personaje1:
 	ldr r0, = ciencia            /* cargamos personaje ciencias*/ 
 	bl puts						 /* se muestra */
-	ldr r0, = ciencia2            /* cargamos personaje ciencias*/ 
+	ldr r0, = ciencia2           /* cargamos personaje ciencias*/ 
 	bl puts						 /* se muestra */
 
 	ldr r1, =categoria1			/*Se carga la categoria ganada*/
@@ -433,16 +453,16 @@ ganar_personaje1:
 	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
 
 ganar_personaje2:
-	ldr r0, = literatura            /* cargamos personaje literatura*/ 
-	bl puts							/* se muestra */
-	ldr r0, = literatura2            /* cargamos personaje literatura*/ 
-	bl puts						 /* se muestra */
-	ldr r0, = literatura3            /* cargamos personaje literatura*/ 
-	bl puts						 /* se muestra */
-	ldr r0, = literatura4            /* cargamos personaje literatura*/ 
-	bl puts						 /* se muestra */
-	ldr r0, = literatura5            /* cargamos personaje literatura*/ 
-	bl puts						 /* se muestra */
+	ldr r0, = literatura        /* cargamos personaje literatura*/ 
+	bl puts						/* se muestra */
+	ldr r0, = literatura2	    /* cargamos personaje literatura*/ 
+	bl puts						/* se muestra */
+	ldr r0, = literatura3       /* cargamos personaje literatura*/ 
+	bl puts						/* se muestra */
+	ldr r0, = literatura4       /* cargamos personaje literatura*/ 
+	bl puts						/* se muestra */
+	ldr r0, = literatura5       /* cargamos personaje literatura*/ 
+	bl puts						/* se muestra */
 
 	ldr r1, =categoria2			/*Se carga la categoria ganada*/
 	ldr r0, =ganaPersonaje
@@ -451,12 +471,12 @@ ganar_personaje2:
 	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
 
 ganar_personaje3:
-	ldr r0, = mundo            /* cargamos personaje geografia*/ 
-	bl puts						 /* se muestra */
+	ldr r0, = mundo				/* cargamos personaje geografia*/ 
+	bl puts						/* se muestra */
 	ldr r0, = mundo2            /* cargamos personaje geografia*/ 
-	bl puts						 /* se muestra */
+	bl puts						/* se muestra */
 	ldr r0, = mundo3            /* cargamos personaje geografia*/ 
-	bl puts						 /* se muestra */
+	bl puts						/* se muestra */
 
 	ldr r1, =categoria3			/*Se carga la categoria ganada*/
 	ldr r0, =ganaPersonaje
@@ -465,10 +485,10 @@ ganar_personaje3:
 	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
 
 ganar_personaje4:
-	ldr r0, = arte            /* cargamos personaje arte*/ 
-	bl puts						 /* se muestra */
-	ldr r0, = arte2            /* cargamos personaje arte*/ 
-	bl puts						 /* se muestra */
+	ldr r0, = arte				/* cargamos personaje arte*/ 
+	bl puts						/* se muestra */
+	ldr r0, = arte2				/* cargamos personaje arte*/ 
+	bl puts						/* se muestra */
 
 	ldr r1, =categoria4			/*Se carga la categoria ganada*/
 	ldr r0, =ganaPersonaje
@@ -477,11 +497,11 @@ ganar_personaje4:
 	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
 
 ganar_personaje5:
-	ldr r0, = historia            /* cargamos personaje historia*/ 
+	ldr r0, = historia           /* cargamos personaje historia*/ 
 	bl puts						 /* se muestra */
-	ldr r0, = historia2            /* cargamos personaje historia*/ 
+	ldr r0, = historia2          /* cargamos personaje historia*/ 
 	bl puts						 /* se muestra */
-	ldr r0, = historia3            /* cargamos personaje historia*/ 
+	ldr r0, = historia3          /* cargamos personaje historia*/ 
 	bl puts						 /* se muestra */
 
 	ldr r1, =categoria5			/*Se carga la categoria ganada*/
@@ -491,8 +511,8 @@ ganar_personaje5:
 	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
 
 ganar_personaje6:
-	ldr r0, = deporte            /* cargamos personaje deportes*/ 
-	bl puts						 /* se muestra */
+	ldr r0, = deporte           /* cargamos personaje deportes*/ 
+	bl puts						/* se muestra */
 
 	ldr r1, =categoria6			/*Se carga la categoria ganada*/
 	ldr r0, =ganaPersonaje
@@ -500,17 +520,19 @@ ganar_personaje6:
 
 	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
 
-.data
-respuesta:	.byte	' '
 
-nom_jugador1:	.asciz "            "
-nom_jugador2:	.asciz "            "
+/*INTERFAZ*/
+
+.data
+respuesta:		.byte	' '
+formato:		.asciz  "\n%s"
+num:			.asciz	"\n%d\n"
+
 ingreso_nom:	.asciz "\nHola jugador 1! Ingresa tu nombre:"
 ingreso_nom2:	.asciz "\nHola jugador 2! Ingresa tu nombre:"
 jugador_actual:	.asciz  "\nEs turno de: %s"
 categoria_actual:.asciz  "\nCategoria actual: %s\n"
-formato:		.asciz  "\n%s"
-num:			.asciz	"\n%d\n"
+
 
 categoria1:		.asciz "Ciencia y Tecnologia" 
 categoria2:		.asciz "Literatura"
@@ -537,6 +559,7 @@ ciencia_5:		.asciz "\nCiencia que estudia los seres vivos\na. Viviologia\nb. Org
 ciencia_6:		.asciz "\nLa velocidad a la que viaja la luz es\na. 300,000 m/s\nb. 300,000 km/s\nc. 30,000 km/h"
 respuestas_ciencia:	.byte  'b', 'a', 'b', 'a', 'c', 'b'
 
+/*PREGUNTAS PARA -> LITERATURA*/
 literatura_1:		.asciz "\nQuien escribio 'La Iliada'?\na. Homero\nb. Herodoto\nc. Seneca"     
 literatura_2:		.asciz "\nQuien es el autor de la 'Divina comedia'?\na. Petrarca\nb. Virgilio\nc. Dante Alighier"
 literatura_3:		.asciz "\nQue autor NO pertenece al boom latinoamericano?\na. Julio Cortazar\nb. Ruben Dario\nc. Gabriel Garcia Marquez"
@@ -545,6 +568,7 @@ literatura_5:		.asciz "\nAutor que escribe en el genero de terror\na. Stephen Ki
 literatura_6:		.asciz "\nCual de los autores SI pertenece al genero del realismo magico y es guatemalteco?\na. Frida Kahlo\nb. Gabriel Garcia Marquez\nc. Miguel Angel Asturias"
 respuestas_literatura:	.byte 'a', 'c', 'b', 'c', 'a', 'c'
 
+/*PREGUNTAS PARA -> GEOGRAFIA*/
 geografia_1:		.asciz "\nContinente con la mayor cantidad de paises\na. Africa\nb. Europa\nc. Asia"  
 geografia_2:		.asciz "\nPais mas grande del mundo\na. China\nb. Rusia\nc. Canada"
 geografia_3:		.asciz "\nDe qué tiene forma Italia?\na. Camisa\nb. Sombrero\nc. Bota"
@@ -553,6 +577,7 @@ geografia_5:		.asciz "\nDonde se encuentra el rio mas grande de Africa?\na. Arge
 geografia_6:		.asciz "\nCual de los siguientes es el lago mas grande del mundo?\na. Mar Rojo\nb. Mar Mediterraneo\nc. Mar Caspio"
 respuestas_geografia:	.byte 'a', 'b', 'c', 'a', 'b', 'c'
 
+/*PREGUNTAS PARA -> ARTE*/
 arte_1:			.asciz "\nA que movimiento pertenecio Pablo Picasso?\na. Cubismo\nb. Surrealismo\nc. Realismo"
 arte_2:			.asciz "\nArtista que se corto su propia oreja\na. Donatello\nb. Leonardo\nc. Vincent Van Gogh"
 arte_3:			.asciz "\nArtista y miembro de las tortugas ninja\na. Claude Monet\nb. Miguel Angel\nc. Leonardo Da Vinci"
@@ -561,6 +586,7 @@ arte_5:			.asciz "\nQuien fue el primer arquitecto encargado de 'La Sagrada Fami
 arte_6:			.asciz "\nCual de estos era inventor a parte de ser artista?\na. Dali\nb. Duchamp\nc. Da Vinci"
 respuestas_arte:	.byte 'a', 'c', 'b', 'c', 'b', 'c'
 
+/*PREGUNTAS PARA -> HISTORIA*/
 historia_1:		.asciz "\nCuantas veces fue apunalado el emperador Julio Cesar?\na. 23\nb. 21\nc. 24"
 historia_2:		.asciz "\nDonde se asento la primera civilizacion?\na. Rio Nilo\nb. Mesopotamia\nc. Amazonas"
 historia_3:		.asciz "\nLugar donde cruzan los humanos a América\na. Estrecho de Bering\nb. Estrecho de Gibraltar\nc. Estrecho de Malaca"
@@ -569,6 +595,7 @@ historia_5:		.asciz "\nCaracteristica geografica donde se asientan las civilizac
 historia_6:		.asciz "\nQuien estaba al mando del mayor imperio en la historia?\na. La corona inglesa\nb. Genghis Khan\nc. Alejandro el Grande"
 respuestas_historia:	.byte 'a', 'b', 'a', 'c', 'a', 'a'
 
+/*PREGUNTAS PARA -> DEPORTES Y ENTRETENIMIENTO*/
 deportes_1:		.asciz "\nQue pelicula de la trilogia del Senor de los Anillos gano todos los oscares a los cuales fue nominada?\na. La Comunidad del Anillo\nb. Las Dos Torres\nc. El Retorno del Rey"
 deportes_2:		.asciz "\nArtista mas vendido de la historia\na. Elvis Presley\nb. Michael Jackson\nc. Elton John"
 deportes_3:		.asciz "\nCual es el videojuego mas vendido de la historia?\na. Tetris\nb. Minecraft\nc. GTAV"
