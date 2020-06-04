@@ -39,6 +39,9 @@ nom_jugador1:	.asciz "            "
 nom_jugador2:	.asciz "            "
 .text
 
+/* nombre_jugador son las subrutinas encargadas de recibir los nombres de los jugadores */
+/* Diseñadas y programadas por */
+/* Martin Amado y Andrea Amaya */
 /*	Parametros	> r0 con el nombre del jugador 1
 	Retorna		> r1 con el nombre del jugador	 */
 .global nombre_jugador1
@@ -77,11 +80,14 @@ nombre_jugador2:
 
 
 /*	Parametros	> r6 turno actual, r5 nombre jugador 2, r4 nombre jugador 1  */
+/* Las subrutinas desde comenzarJuego hasta ganar_personaje son las encargadas de llevar el juego */
+/* Diseñadas y programadas por */
+/* Martin Amado y Andrea Amaya */
 .global comenzarJuego
 comenzarJuego:
 	push {r4-r12, lr}
-	ldr r12, =nom_jugador1
 
+/* Encargada de mostrar de quien es el turno */
 mostrar_jugador:
 	mov r7, #0					/* Contador de preguntas buenas */
 	cmp r6, #1					/* Comparamos cual es el jugador actual*/
@@ -90,7 +96,7 @@ mostrar_jugador:
 	ldr r0, = jugador_actual    /* cargar dirección de la cadena a imprimir*/ 
 	bl printf                   /* se muestra */
 
-
+/* Genera un numero del 0 al 5 para generar una de las 6 categoria */
 categoria_aleatoria:
 	mov r8, #0					/*Reiniciando parametros*/
 	mov r9, #0
@@ -105,6 +111,7 @@ categoria_aleatoria:
 	pop {r0}					/*Se saca r0 del stack*/
 
 /*r8 -> categoria aleatoria*/
+/* Genera un numero del 0 al 5 para generar una de las 6 preguntas por categoria */
 pregunta_aleatoria:
 	bl myrand					/*R0 contendra el numero aleatorio generado*/
 	push {r0}					/*R0 se mete al stack*/
@@ -133,6 +140,8 @@ pregunta_aleatoria:
 	beq mostrar_categoria6
 
 /*r8 -> categoria aleatoria      r9 -> pregunta aleatoria      r10 -> direccion de la respuesta correcta */
+/* En mostrar_categoria, se muestra la pregunta de la categoria indicada y generada anteriormente */
+/* Se revisa si la respuesta ingresada es la correcta */
 /* CATEGORIA -> CIENCIAS */
 mostrar_categoria1:
 	/* Dependiendo del valor de r9, escoge la pregunta y posibles respuestas correspondientes */
@@ -382,6 +391,7 @@ mostrar_categoria6:
 	bne incorrecta
 
 /*r0 -> respuesta ingresada      r6 -> jugador actual      r10 -> direccion del contador correcto	r11 -> contador extra para direccionar los vectores */
+/* Si la respuesta fue CORRECTA y ya obtuvo 3 respuestas correctas de dicha categoria, se muestra el personaje */
 seguirTurno: 
 	ldr r0, =respuestaCorrecta		/*La respuesta es correcta*/
 	bl puts
@@ -395,7 +405,7 @@ seguirTurno:
 	mul r10, r8						/*Direccion del contador correcto dentro del vector*/
 	add r11, r11, r10				/*Direccion actual*/
 
-	ldr r1, [r11]					/*Jalamos el numero a r10*/
+	ldr r1, [r11]					/*Jalamos el numero a r1*/
 	add r1, r1, #1					/*Sumamos 1 al contador*/
 	str r1,[r11],r10				/*Se guarda en la posicion correspondiente de notas el valor guardado en r1*/
 	
@@ -408,7 +418,24 @@ mostrarPersonaje:
 	cmp r8, #0
 	beq ganar_personaje1			/*Se gana el personaje de ciencias*/
 
+	cmp r8, #1
+	beq ganar_personaje2			/*Se gana el personaje de literatura*/		
+
+	cmp r8, #2
+	beq ganar_personaje3			/*Se gana el personaje de geografia*/
+
+	cmp r8, #3
+	beq ganar_personaje4			/*Se gana el personaje de arte*/
+
+	cmp r8, #4
+	beq ganar_personaje5			/*Se gana el personaje de historia*/
+
+	cmp r8, #5
+	beq ganar_personaje6			/*Se gana el personaje de deportes y entretenimiento*/
+
 /*r7 -> cantidad de respuestas correctas por ronda */
+
+/* Una vez llegue a 3 respuestas correctas seguidas, se cambia de turno */
 sumarCorrecta:
 	/*Sumando respuesta correcta al contador si r7 es 3, cambiar turno*/
 	add r7, r7, #1					/* r7++ */
@@ -436,10 +463,19 @@ cambiarTurno:
 	movne r6, #1					/*Si el jugador actual es 2, se cambia a jugador 1*/
 
 	b mostrar_jugador				/*Cambiamos al jugador que toque*/
+
+ganarJuego:
+	cmp r6, #1
+	ldreq r1, =nom_jugador1
+	ldrne r1, =nom_jugador2
+	ldr r0, =jugador_ganador
+	bl printf
 	
 finalizarJuego:
 	pop {r4-r12, pc}				/*Regresando sin error*/
 
+
+/* Se muestra el ascii Art del personaje ganado */
 ganar_personaje1:
 	ldr r0, = ciencia            /* cargamos personaje ciencias*/ 
 	bl puts						 /* se muestra */
@@ -450,7 +486,8 @@ ganar_personaje1:
 	ldr r0, =ganaPersonaje
 	bl printf
 
-	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
+	b revisarGanar				/* Se revisa si ya llego a los tres personajes */
+
 
 ganar_personaje2:
 	ldr r0, = literatura        /* cargamos personaje literatura*/ 
@@ -468,7 +505,7 @@ ganar_personaje2:
 	ldr r0, =ganaPersonaje
 	bl printf
 
-	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
+	b revisarGanar				/* Se revisa si ya llego a los tres personajes */
 
 ganar_personaje3:
 	ldr r0, = mundo				/* cargamos personaje geografia*/ 
@@ -482,7 +519,7 @@ ganar_personaje3:
 	ldr r0, =ganaPersonaje
 	bl printf
 
-	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
+	b revisarGanar				/* Se revisa si ya llego a los tres personajes */
 
 ganar_personaje4:
 	ldr r0, = arte				/* cargamos personaje arte*/ 
@@ -494,7 +531,7 @@ ganar_personaje4:
 	ldr r0, =ganaPersonaje
 	bl printf
 
-	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
+	b revisarGanar				/* Se revisa si ya llego a los tres personajes */
 
 ganar_personaje5:
 	ldr r0, = historia           /* cargamos personaje historia*/ 
@@ -508,7 +545,7 @@ ganar_personaje5:
 	ldr r0, =ganaPersonaje
 	bl printf
 
-	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
+	b revisarGanar				/* Se revisa si ya llego a los tres personajes */
 
 ganar_personaje6:
 	ldr r0, = deporte           /* cargamos personaje deportes*/ 
@@ -518,7 +555,24 @@ ganar_personaje6:
 	ldr r0, =ganaPersonaje
 	bl printf
 
-	b sumarCorrecta				/*Se regresa para revisar si sigue turno*/
+	b revisarGanar				/* Se revisa si ya llego a los tres personajes */
+
+revisarGanar:
+	cmp r6, #1
+	ldreq r1, =gana1
+	ldrne r1, =gana2		/* Se carga el contador de presonajes del jugador indicado */
+	ldr r1, [r1]
+	add r1, r1, #1			/* Se le suma uno al contador */
+	cmp r1, #3			/* Si ha llegado a 3, mostrar mensaje */
+	beq ganarJuego
+	mov r12, r1
+	cmp r6, #1
+	ldreq r1, =gana1
+	ldrne r1, =gana2
+	str r12, [r1]
+
+
+	b sumarCorrecta
 
 
 /*INTERFAZ*/
@@ -527,11 +581,14 @@ ganar_personaje6:
 respuesta:		.byte	' '
 formato:		.asciz  "\n%s"
 num:			.asciz	"\n%d\n"
+gana1:			.word 0
+gana2:			.word 0
 
 ingreso_nom:	.asciz "\nHola jugador 1! Ingresa tu nombre:"
 ingreso_nom2:	.asciz "\nHola jugador 2! Ingresa tu nombre:"
 jugador_actual:	.asciz  "\nEs turno de: %s"
 categoria_actual:.asciz  "\nCategoria actual: %s\n"
+jugador_ganador: .asciz "\nEl ganador es: %s\n"
 
 
 categoria1:		.asciz "Ciencia y Tecnologia" 
@@ -606,21 +663,21 @@ respuestas_deportes:	.byte 'c', 'a', 'b', 'c', 'a', 'b'
 
 
 /*PERSONAJES DENTRO DE LA TRIVIA*/
-ciencia: .asciz "\n..II7IIIIIIII$NIIIIIIIIIIIIIII~~I.......\n..IIIIIIIIIINNIIIII78MI7IIIIIII=~+......\n..IIIIIIIIIIIIIIIIII7II7IIIIIII=7.......\n....,,,$$$$$$$$$$$$$$7$$$$77+,.....I.II.\n.......777777$$7$7777$777777=.....,I,I,.\n.......7777777NN777NM7777777=....,III~7:\n.......7777777NN777NM7777777=......III..\n.......7777777NN777NN7777777=......I=...\n.......777$$$7MN$77MM777$777=......I....\n.......7777777$$$777$$777777=......I....\n.......777777887$777OD777777=.....?+....\n.......7777777$$$77$77777777=....,I.....\n.......777777777777777777777=...,I,.....\n.......777777777777777777777=..II.......\n.......7777777777777777777777II.........\n.......777777777777777777777=...........\n.......77777777777777777777$=...........\n.......777777777777777777777=...........\n......I777777777777777777777=...........\n.....II777777777777777777777=...........\n....,I.77777777777777777+~77=...........\n....7~.7777777777777777~~~77=...........\n....I..7777777777777777~~~77=...........\n...:I..7777777777777777~~~77=...........\n"
+ciencia: .asciz "\n..II7IIIIIIII$NIIIIIIIIIIIIIII~~I.......\n..IIIIIIIIIINNIIIII78MI7IIIIIII=~+......\n..IIIIIIIIIIIIIIIIII7II7IIIIIII=7.......\n....,,,$$$$$$$$$$$$$$7$$$$77+,.....I.II.\n.......777777$$7$7777$777777=.....,I,I,.\n.......7777777NN777NM7777777=....,III~7:\n.......7777777NN777NM7777777=......III..\n.......7777777NN777NN7777777=......I=...\n.......777$$$7MN$77MM777$777=......I....\n.......7777777$$$777$$777777=......I....\n.......777777887$777OD777777=.....?+....\n.......7777777$$$77$77777777=....,I.....\n.......777777777777777777777=...,I,.....\n.......777777777777777777777=..II.......\n.......7777777777777777777777II.........\n.......777777777777777777777=...........\n.......77777777777777777777$=...........\n.......777777777777777777777=...........\n......I777777777777777777777=...........\n.....II777777777777777777777=...........\n....,I.77777777777777777+~77=...........\n....7~.7777777777777777~~~77=...........\n....I..7777777777777777~~~77=...........\n...:I..7777777777777777~~~77=..........."
 ciencia2: .asciz "\n...I:..7777777777777777~~~77=...........\n...I...7777777777777777~~~77=...........\n...I...777777$7$$777777~~~77=...........\nI??7II.77$OOO888OO$7777~~~77=...........\n:7II.I.77788888O8O888OO~~~77=...........\n,.,I...777O88O8O888888O~~~77=...........\n.......777O888OOO88888O~~~$7=...........\n.......7778888OOOO88888~=+7$,...........\n.......:77O8888OO88888O~877$............\n........77$O888888OO8OO8$7$,............\n.........$$778OOOOOO8O8$77..............\n...........777$7ZOO$7$$77...............\n.............77$7$$7$7,.................\n...............I+..I+...................\n...............I,..?I...................\n...............7...,I...................\n.......,~~I:::~7~::~:...........\n.....::7IIII+:::IIII7I~::,........\n......:::::::~:::~::..........\n.............,:::~~:::,.................\n"
 deporte: .asciz "\n........................................\n...............??.......................\n.............IIIIII?....$7..............\n....777.....IIII~~~..7..............\n.....7$....I~~D8~.................\n......,...~~?IIDII~...............\n.......7..~~+IIIIIDI8ZI8DDDZ............\n........$+IIII?IIID?IINN8DDDZ...........\n.........IIIIIIIIIIIIINNNNDD$...........\n.........7IIIIIIIIIIIINNNN8DDZ..........\n.........IIIIIIIIIIIII?NNNDDDZ..........\n.........II$IIIIIIIIIII~~+~DI...........\n.........IIIIIIIIIIIII?II==II...........\n..........IIIIIIIIIIIIIII7?.............\n..........IIIIIIIIIIIIIIIII.............\n...........IIIIIIIIIIIIIIII.............\n............IIIIIIIIIIIII~..............\n.............~~~~...............\n...............~~~+7.77...........\n................IIIIIII?................\n...................II?7.................\n......................+.................\n...............+++++++++++:.............\n........................................\n........................................\n"
-historia: .asciz "\n............................................................\n............................................................\n............................................................\n.......................................~~==...............\n.....................................=~~~=..............\n...........................+?+?++++++=~~~=+.............\n......................=..???+++++++++++?~~..............\n.....................77777I??++++++++++?+?~~............\n....................7777777777?+?+?++++++++~~~............\n...................777Z$$7777777++++++++++++~.............\n..................7777$$77$$777777I+++++++?+~=............\n.................77777Z777$$77$$7777++??++++~~~...........\n...................:77777$Z77Z$7777777++++++~~..........\n...................DDDDZ7777$$$77Z$77777++??~~~=..........\n..................DDDDDDDDO77777$$777777++++~~:...........\n.................,DDDDD8DDDDD7777$77777?++?~..............\n.................+8DDD8~=DDD8DD87777777++?+~..............\n"
-historia2: .asciz "\n................,?++D88=DD=8DDD8877$$$$$7~~,..............\n................++?++ZD8D88DDDDD8DDZ$$$$$$..................\n................?+?+???+DDDD8DDD8DD$$$$$$$..................\n................++I7?++?++??+=ODDD+$$$$$$$..................\n...............I??777?+777+++?????+?$$$$,...................\n..............=.++777777777+++++?++?+?+.....................\n..............=.+7+++??777+?++++++7I?++.....................\n...............:+?+++++?7+++++++++7?+++.....................\n................:++++++?+77+++?++77??++.....................\n.................?+++++++?777777I7?++++.....................\n.................+++++++++?+++?++??++++.....................\n..................+?+++++++++++++++++?+.....................\n....................7++++???+++???++........................\n....................7.............77........................\n....................7...............7.......................\n..................:==7============+I7===~...................\n"
+historia: .asciz "\n............................................................\n............................................................\n............................................................\n.......................................~~==...............\n.....................................=~~~=..............\n...........................+?+?++++++=~~~=+.............\n......................=..???+++++++++++?~~..............\n.....................77777I??++++++++++?+?~~............\n....................7777777777?+?+?++++++++~~~............\n...................777Z$$7777777++++++++++++~.............\n..................7777$$77$$777777I+++++++?+~=............\n.................77777Z777$$77$$7777++??++++~~~...........\n...................:77777$Z77Z$7777777++++++~~..........\n...................DDDDZ7777$$$77Z$77777++??~~~=..........\n..................DDDDDDDDO77777$$777777++++~~:...........\n.................,DDDDD8DDDDD7777$77777?++?~..............\n.................+8DDD8~=DDD8DD87777777++?+~.............."
+historia2: .asciz "\n................,?++D88=DD=8DDD8877$$$$$7~~,..............\n................++?++ZD8D88DDDDD8DDZ$$$$$$..................\n................?+?+???+DDDD8DDD8DD$$$$$$$..................\n................++I7?++?++??+=ODDD+$$$$$$$..................\n...............I??777?+777+++?????+?$$$$,...................\n..............=.++777777777+++++?++?+?+.....................\n..............=.+7+++??777+?++++++7I?++.....................\n...............:+?+++++?7+++++++++7?+++.....................\n................:++++++?+77+++?++77??++.....................\n.................?+++++++?777777I7?++++.....................\n.................+++++++++?+++?++??++++.....................\n..................+?+++++++++++++++++?+.....................\n....................7++++???+++???++........................\n....................7.............77........................\n....................7...............7.......................\n..................:==7============+I7===~..................."
 historia3: .asciz "\n.............+=====I7777+=========777777======..............\n...............+=====777====================~...............\n............................................................\n............................................................\n............................................................\n"
 arte: .asciz "\n.........................OOOOOOOOO8888,.\n....................7.8OOOOOOOO8888,....\n..................OO8OOOOOOOOO8888......\n................OOOOOOOOOOOOOO888$......\n...............OOOOOOOOOOOOOOO888.......\n..............$OOOOOOOOOOOOOOO888.......\n..............OOOOOOOOOOOOOOOO888.......\n..............8OOOOOOOOOOOOOOO888~......\n.......,.......OOOOOOOOOOOOOO8888.......\n......+O7O.....I8DOOOOOOOOOOO8888.......\n......=$$=....+++++++N8OOOO88888,.......\n.......~O...$$$$7?+++++OO888888,........\n........O.$$$7$ZN$$N7++++8888,..........\n........Z7$$$$7N7$NN$$$++......Z.,......\n.......?$$$7$$NN$ON$$$$$$....,~OZ?......\n.......$$$$7$7N$$NZ$$$$$$.....ZOZO......\n......$$$$$$8$$$$8$$$$$$7....O~.........\n.....,$$$$$$$$D$$ZZ$77$$$..$O...........\n.....$$7$$$$$$$$$$$$$$$$$.ZZ............\n.....$$$$$$$$$$$$$$$$$$$$Z,.............\n.....7$$$$$$$$$$$$$$$$$$Z...............\n.....$$$$$$$$$$$$$$$$$$$................\n.....$$$$$$$$$$$$$$$$$$.................\n.....$$$$$$$$$$$$$$$$$+................."
 arte2: .asciz "\n.....$$$$$$$$$$$$$$$$7..................\n.....7$$$$$$$$$$$$$$$...................\n.....$$$$$$$$$$$$$$$+...................\n.....,$$$$$$$$$$$$$$....................\n......$$$$$$$$$$$$$?....................\n......:$$$$$$$$$$$7.....................\n.......$7$$$$$$$$$7.....................\n.......+$$$$$$$$$$,.....................\n........$$$$$$$$$$......................\n.........$$$$$$$$$......................\n..........7$$$$$$.......................\n............II,O........................\n............,O.?........................\n....:::::~O:~7::~:~~..............\n...,:::~::~:::::~::.............\n..........,,::~~:::,....................\n"
-mundo: .asciz "\n....................+++++++++++++++++?......................\n................777+++++++++++++++++++++++..................\n..............7777$I+++++7+++++++++++77777I+................\n............$77777777777777$$?+++++777777777$7..............\n..........:$777777777777777777++++?777777777$77~............\n.........$77777777777777777++++$77777777777777777...........\n........777777777777777O8$777778$7777777777777777$..........\n.......7777777777777778$7777777788$777777777777777$,........\n......777777777777777777777777777777777777777777777I........\n.....$777777777777777777777777777777777777777777777+?.......\n....,7777777777777777777O$7777$$77777777777777777777+:......\n....$777777777777777777ZDD7777DD77777777777777777777++......\n....7777777777777777777ZDD7777DD77777777777777777777$+......\n....7777777777777777777ZND7777DD7777$777777777777777I+......\n...~7777777777777777Z777Z777777777$O77777777777777$?+++.....\n...=77777777777777777O77777777777ZZ77777777777777$+++++.....\n"
-mundo2: .asciz "\n...:7777777777777777777OOZ$77ZOO77777777777777777+++++=.....\n....777777777777777777777777777777777777777777777+++++,.....\n....7777777777777777777777777777777777777777777777++++......\n....I77777777777777777777777777777777777777777777777+?......\n.....777777777777777777777777777777777777777777777$I+.......\n.....?7777777777777777777777777777777777777777777777?.......\n......7777777777777777777777777777777777777777777777........\n......+$777777777777777$$7777777777777777777777777$+........\n......+.7777777777I++++++++I$777777777777777777777,?........\n.....+=..I7777777?+++++++++++++++I77777777777777I..:+.......\n.....+....:777777$+++++++++++++++++777777777$77~....+:......\n=++++......?7777++++++++++++++++++?777777777I.......+...~.\n+?++.........~7I++++++++++++++++++77777777..........?+=,..\n=,.~+............I+?++++++++++++++?77777$.............+=+++,\n...................=+?+?++++++++++++?,+,..............+=....\n...................+..................,+....................\n"
+mundo: .asciz "\n....................+++++++++++++++++?......................\n................777+++++++++++++++++++++++..................\n..............7777$I+++++7+++++++++++77777I+................\n............$77777777777777$$?+++++777777777$7..............\n..........:$777777777777777777++++?777777777$77~............\n.........$77777777777777777++++$77777777777777777...........\n........777777777777777O8$777778$7777777777777777$..........\n.......7777777777777778$7777777788$777777777777777$,........\n......777777777777777777777777777777777777777777777I........\n.....$777777777777777777777777777777777777777777777+?.......\n....,7777777777777777777O$7777$$77777777777777777777+:......\n....$777777777777777777ZDD7777DD77777777777777777777++......\n....7777777777777777777ZDD7777DD77777777777777777777$+......\n....7777777777777777777ZND7777DD7777$777777777777777I+......\n...~7777777777777777Z777Z777777777$O77777777777777$?+++.....\n...=77777777777777777O77777777777ZZ77777777777777$+++++....."
+mundo2: .asciz "\n...:7777777777777777777OOZ$77ZOO77777777777777777+++++=.....\n....777777777777777777777777777777777777777777777+++++,.....\n....7777777777777777777777777777777777777777777777++++......\n....I77777777777777777777777777777777777777777777777+?......\n.....777777777777777777777777777777777777777777777$I+.......\n.....?7777777777777777777777777777777777777777777777?.......\n......7777777777777777777777777777777777777777777777........\n......+$777777777777777$$7777777777777777777777777$+........\n......+.7777777777I++++++++I$777777777777777777777,?........\n.....+=..I7777777?+++++++++++++++I77777777777777I..:+.......\n.....+....:777777$+++++++++++++++++777777777$77~....+:......\n=++++......?7777++++++++++++++++++?777777777I.......+...~.\n+?++.........~7I++++++++++++++++++77777777..........?+=,..\n=,.~+............I+?++++++++++++++?77777$.............+=+++,\n...................=+?+?++++++++++++?,+,..............+=....\n...................+..................,+...................."
 mundo3: .asciz "\n..................,+...................+,...................\n...................?...................+,...................\n...........,::~::++:~~::~~~+:::~~:,.............\n.........:~:=++++::~~~~~+?++=~~...........\n...........:::~::~:~~~:~~::::~:.............\n....................,,,:::::~~:::::,,,......................\n"
-literatura: .asciz "\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM::::::MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM$::::::::+MM$ZMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMM:::::::MZ::7::::::::::I::::O:::~N:::~MMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMI:::::::~:::::::::::,::::::::::::::::::::MMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMM:::::::::::::::::::::::::::::::::,,:::::::MMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMM+::::,::,:,::::::::::::::::::::::::::::::::MMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMDZ::::::::::::::::::::,,,::::::::::::::::::::::7MMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMM+::::::::::::::::::::::,::::::::::::::::::::::::::MMMMMMMMMMMMMMMMM\nMMMMMMM8:::::::::::::::::::::::,::,,:::::::::::::::::::::::::::::::$DMMMMMMMMMMM\nMMMMMMD:::::,::::::::::::::::::::::::::::::::::::::::::,::::::::::::::OMMMMMMMMM\nMMMMMMZ:::::::::::::::::::::::::::::::::::::::,::::::::::,:::::::::::::MMMMMMMMM\nMMMMMMM::::::::::::,:,::::::::::::::::::::::,:::,,:::::::::::::::::::::MMMMMMMMM\n"
-literatura2: .asciz "\nMMMMMMN$:::,::::::::,:::::::::,,,,:::::::::::::::,:,::::::::$MMMMMMMMM\nMMMMD::::,::::::::::::::::::::::::,,::::::::::::::::::::::::::::::::::::$MMMMMMM\nMMMMN:::::::::::::::::::::::::::::,::::::::::::::::::::::::::::::::::::::MMMMMMM\nMMMMMN~::::::=+??+=::::===+=:::::=????+=::::::=+++==::::+???+~:::::=MMMMMMMM\nMMMMMM:::::+????????+==========????????????+:=========+:?????????:::~MMMMMMMMM\nMMMMMMM?::+??????????+=========+OZ??????????7Z?+=========???????????ODMMMMMMMMMM\nMMMMMMMMMMMI?????????+======+ODD8????????????8DDO========??????????8MMMMMMMMMMMM\nMMMMMMMMMMMZ?????????+=======8Z+??????????????+$8?=======??????????MMMMMMMMMMMMM\nMMMMMMMMMMMM?????????+==========??????????????+==========??????????MMMMMMMMMMMMM\nMMMMMMMMMMMM??????????==========??????????????+==========??????????MMMMMMMMMMMMM\nMMMMMMMMMMMM7?????????==========??????????????+=========+?????????OMMMMMMMMMMMMM\nMMMMMMMMMMMMD?????????+=========??????????????+=========+?????????MMMMMMMMMMMMMM\n"
-literatura3: .asciz "\nMMMMMMMMMMMMM?????????==========??????????????+=========??????????MMMMMMMMO8MMMM\nMMM7IMMMMMMMM?????????==========DDD????????7DDD=========??????????MMMMMM$M7IMDII\nINNIIM7NMMMMMO????????++=======+DDD????????ZDDD=========?????????OMMMMMMIIOIOIIN\nIIDIIIIMMMMMMM????????++=======+DDD????????ZDDD=========?????????MMMMMMMMIIII7MM\nMIIIIIMMMMMMMM?????????========+DDD????????ZDDD========+?????????MMMMMMMMMDIIMMM\nMM$IDMMMMMMMMMZ????????========+DDD????????ZDDD========+????????IMMMMMMMMMMZIMMM\nMMZIMMMMMMMMMMM????????==++====+DDD????????ZDDD=====++=?????????ZMMMMMMMMMM7IMMM\nMMMI8MMMMMMMMMM????????===7====+DDD????????ZDDD=====I==?????????NMMMMMMMMMMIOMMM\nMMMIIMMMMMMMMMM7???????====Z====8DD????????IDD8+===$===?????????MMMMMMMMMM$IMMMM\nMMMMI$MMMMMMMMMN???????+====ZI+==?????????????===+Z+===?????????MMMMMMMMM77MMMMM\nMMMMM7IOMMMMMMMM???????+=====+7O??????????????+Z$======?????????MMMMMMOIIZMMMMMM\nMMMMMMN7IIZDNDZI????????========+$OOOZZ$$ZOOOZ+=======+?????????IIIIIIIDMMMMMMMM\n"
-literatura4: .asciz "\nMMMMMMMMMMMNDNMMI???????=========????????????+========+????????8MMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMZ???????========+????????????+========?????????MMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMM???????=========????????????+========?????????MMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMM???????+========????????????+========????????IMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMI??????+========????????????+========????????8MMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMD???????========????????????+=======+????????MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMM???????=======+????????????+=======+????????MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMM???????========????????????========+???????7MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMO??????========????????????========+???????8MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMM??????+=======????????????========+???????MMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMM??????+=======+???????????+=======????????MMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMD$???+=======+???????????+=======?????$DNMMMMMMMMMMMMMMMMMMM\n"
+literatura: .asciz "\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM::::::MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM$::::::::+MM$ZMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMM:::::::MZ::7::::::::::I::::O:::~N:::~MMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMI:::::::~:::::::::::,::::::::::::::::::::MMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMM:::::::::::::::::::::::::::::::::,,:::::::MMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMM+::::,::,:,::::::::::::::::::::::::::::::::MMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMDZ::::::::::::::::::::,,,::::::::::::::::::::::7MMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMM+::::::::::::::::::::::,::::::::::::::::::::::::::MMMMMMMMMMMMMMMMM\nMMMMMMM8:::::::::::::::::::::::,::,,:::::::::::::::::::::::::::::::$DMMMMMMMMMMM\nMMMMMMD:::::,::::::::::::::::::::::::::::::::::::::::::,::::::::::::::OMMMMMMMMM\nMMMMMMZ:::::::::::::::::::::::::::::::::::::::,::::::::::,:::::::::::::MMMMMMMMM\nMMMMMMM::::::::::::,:,::::::::::::::::::::::,:::,,:::::::::::::::::::::MMMMMMMMM"
+literatura2: .asciz "\nMMMMMMN$:::,::::::::,:::::::::,,,,:::::::::::::::,:,::::::::$MMMMMMMMM\nMMMMD::::,::::::::::::::::::::::::,,::::::::::::::::::::::::::::::::::::$MMMMMMM\nMMMMN:::::::::::::::::::::::::::::,::::::::::::::::::::::::::::::::::::::MMMMMMM\nMMMMMN~::::::=+??+=::::===+=:::::=????+=::::::=+++==::::+???+~:::::=MMMMMMMM\nMMMMMM:::::+????????+==========????????????+:=========+:?????????:::~MMMMMMMMM\nMMMMMMM?::+??????????+=========+OZ??????????7Z?+=========???????????ODMMMMMMMMMM\nMMMMMMMMMMMI?????????+======+ODD8????????????8DDO========??????????8MMMMMMMMMMMM\nMMMMMMMMMMMZ?????????+=======8Z+??????????????+$8?=======??????????MMMMMMMMMMMMM\nMMMMMMMMMMMM?????????+==========??????????????+==========??????????MMMMMMMMMMMMM\nMMMMMMMMMMMM??????????==========??????????????+==========??????????MMMMMMMMMMMMM\nMMMMMMMMMMMM7?????????==========??????????????+=========+?????????OMMMMMMMMMMMMM\nMMMMMMMMMMMMD?????????+=========??????????????+=========+?????????MMMMMMMMMMMMMM"
+literatura3: .asciz "\nMMMMMMMMMMMMM?????????==========??????????????+=========??????????MMMMMMMMO8MMMM\nMMM7IMMMMMMMM?????????==========DDD????????7DDD=========??????????MMMMMM$M7IMDII\nINNIIM7NMMMMMO????????++=======+DDD????????ZDDD=========?????????OMMMMMMIIOIOIIN\nIIDIIIIMMMMMMM????????++=======+DDD????????ZDDD=========?????????MMMMMMMMIIII7MM\nMIIIIIMMMMMMMM?????????========+DDD????????ZDDD========+?????????MMMMMMMMMDIIMMM\nMM$IDMMMMMMMMMZ????????========+DDD????????ZDDD========+????????IMMMMMMMMMMZIMMM\nMMZIMMMMMMMMMMM????????==++====+DDD????????ZDDD=====++=?????????ZMMMMMMMMMM7IMMM\nMMMI8MMMMMMMMMM????????===7====+DDD????????ZDDD=====I==?????????NMMMMMMMMMMIOMMM\nMMMIIMMMMMMMMMM7???????====Z====8DD????????IDD8+===$===?????????MMMMMMMMMM$IMMMM\nMMMMI$MMMMMMMMMN???????+====ZI+==?????????????===+Z+===?????????MMMMMMMMM77MMMMM\nMMMMM7IOMMMMMMMM???????+=====+7O??????????????+Z$======?????????MMMMMMOIIZMMMMMM\nMMMMMMN7IIZDNDZI????????========+$OOOZZ$$ZOOOZ+=======+?????????IIIIIIIDMMMMMMMM"
+literatura4: .asciz "\nMMMMMMMMMMMNDNMMI???????=========????????????+========+????????8MMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMZ???????========+????????????+========?????????MMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMM???????=========????????????+========?????????MMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMM???????+========????????????+========????????IMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMI??????+========????????????+========????????8MMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMD???????========????????????+=======+????????MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMM???????=======+????????????+=======+????????MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMM???????========????????????========+???????7MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMO??????========????????????========+???????8MMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMM??????+=======????????????========+???????MMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMM??????+=======+???????????+=======????????MMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMD$???+=======+???????????+=======?????$DNMMMMMMMMMMMMMMMMMMM"
 literatura5: .asciz "\nMMMMMMMMMMMMMMMMMMMMMMMMMMM87+=+=+???????????=++=++?7MMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMI$MMMMMMMMMMMMMMMMIMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNINMMMMMMMMMMMMMMMMIOMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMI8MMMMMMMMMMMMMMMMI8MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMIIMMMMMMMMMMMMMMMMIMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMD$IIIDMMMMMMMMMMMMMMI$NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMIIIIOMMMMMMMMMMMMMMMMMIIII7ZMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\nMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n"
 
 
